@@ -125,7 +125,7 @@ function guardarPromoAdmin(){
   else if(!promoEditId) data.imagen="";
 
   const promise=promoEditId
-    ?firebase.firestore().collection("promociones").doc(promoEditId).update(data)
+    ?firebase.firestore().collection("promociones").doc(promoEditId).set(data,{merge:true})
     :firebase.firestore().collection("promociones").add({...data,createdAt:new Date().toISOString()});
 
   promise.then(()=>{
