@@ -1450,22 +1450,14 @@
 
     function seedBaseProducts(){
       const existing=JSON.parse(localStorage.getItem("productos"))||[];
-      let changed=false;
+      if(existing.length>0) return;
+      const seed=[];
       Object.entries(categoriasBase).forEach(([cat,data])=>{
         (data.productos||[]).forEach(bp=>{
-          const found=existing.find(p=>p.id===bp.id);
-          if(found){
-            if(!found.categoria){found.categoria=cat;changed=true;}
-            if(found.extras===undefined){found.extras=[];changed=true;}
-            if(found.estado===undefined){found.estado=1;changed=true;}
-            if(found.destacado===undefined){found.destacado=false;changed=true;}
-          }else{
-            existing.push({id:bp.id,nombre:bp.nombre,precio:bp.precio,descripcion:bp.descripcion||"",categoria:cat,imagen:bp.imagen||"",extras:[],estado:1,destacado:false,orden:0});
-            changed=true;
-          }
+          seed.push({id:bp.id,nombre:bp.nombre,precio:bp.precio,descripcion:bp.descripcion||"",categoria:cat,imagen:bp.imagen||"",extras:[],estado:1,destacado:false,orden:0});
         });
       });
-      if(changed) localStorage.setItem("productos",JSON.stringify(existing));
+      if(seed.length) localStorage.setItem("productos",JSON.stringify(seed));
     }
     seedBaseProducts();
 
