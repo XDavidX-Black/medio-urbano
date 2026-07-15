@@ -140,14 +140,12 @@ carrusel dentro de la sección existente #promociones
       console.warn("Firebase no disponible para carrusel");
       return;
     }
-    firebase.firestore().collection("promociones")
-      .where("activo","==",true)
-      .orderBy("orden","asc")
-      .get()
+    firebase.firestore().collection("promociones").get()
       .then(snap=>{
         const slides=[];
         snap.forEach(doc=>{
           const d=doc.data();
+          if(d.activo===false) return;
           slides.push({
             id:doc.id,titulo:d.titulo||"",
             descripcion:d.descripcion||"",precio:d.precio||"",
@@ -156,6 +154,7 @@ carrusel dentro de la sección existente #promociones
             orden:d.orden||0
           });
         });
+        slides.sort((a,b)=>a.orden-b.orden);
         render(slides);
       })
       .catch(err=>{
