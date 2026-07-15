@@ -1463,7 +1463,9 @@
 
     function cargarProductosAdmin(){
       const adminProd=JSON.parse(localStorage.getItem("productos"))||[];
-      categorias=JSON.parse(JSON.stringify(categoriasBase));
+      Object.keys(categoriasBase).forEach(cat=>{
+        categorias[cat]={...categoriasBase[cat],productos:[]};
+      });
       adminProd.forEach(p=>{
         if(categorias[p.categoria]){
           if(!categorias[p.categoria].productos) categorias[p.categoria].productos=[];
@@ -1478,6 +1480,11 @@
             estado:p.estado!==undefined?p.estado:1,
             destacado:p.destacado||false
           });
+        }
+      });
+      Object.keys(categorias).forEach(cat=>{
+        if(categorias[cat].proximamente && categorias[cat].productos.length===0){
+          categorias[cat].productos=[];
         }
       });
     }
