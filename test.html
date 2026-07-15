@@ -194,6 +194,7 @@
     .hero-content{position:relative;z-index:2;}
     .hero-logo{
       width:220px;height:auto;object-fit:contain;
+      display:block;margin:0 auto 20px;
       transition:.5s;
       filter:drop-shadow(0 0 30px rgba(255,208,40,.3));
     }
@@ -212,6 +213,27 @@
     }
     .hero p{font-size:20px;color:#aaa;margin-bottom:40px;max-width:650px;opacity:.92;line-height:1.8;margin-inline:auto;}
     .hero-buttons{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;}
+
+    /* Hero scroll indicator */
+    .hero-scroll-indicator{
+      display:flex;flex-direction:column;align-items:center;
+      margin-top:50px;opacity:0;
+      animation:heroFadeIn .8s 1.5s forwards;
+    }
+    .scroll-line{
+      width:2px;height:40px;
+      background:linear-gradient(to bottom,var(--primary),transparent);
+      border-radius:2px;
+      animation:scrollPulse 2s infinite;
+    }
+    @keyframes scrollPulse{
+      0%,100%{opacity:.3;transform:scaleY(1);}
+      50%{opacity:1;transform:scaleY(1.3);}
+    }
+
+    /* Hero dynamic fade-in */
+    .hero-fade-in{opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;}
+    .hero-fade-in.visible{opacity:1;transform:translateY(0);}
 
     .btn-primary{
       padding:18px 45px;border-radius:50px;border:none;
@@ -498,17 +520,6 @@
     /*========================
     FLOATING WHATSAPP
     ========================*/
-    .floating-whatsapp{
-      position:fixed;right:25px;bottom:25px;
-      width:70px;height:70px;
-      background:#25d366;border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-size:34px;color:#fff;z-index:900;
-      box-shadow:0 10px 30px rgba(37,211,102,.4);
-      animation:float 3s ease-in-out infinite;
-    }
-    .floating-whatsapp:hover{transform:scale(1.1);}
-
     /*========================
     BACK TO TOP
     ========================*/
@@ -591,8 +602,151 @@
       .delivery-box p{font-size:16px;}
       .contact-card{padding:35px 20px;}
       .cart-panel{width:100%;}
-      .floating-whatsapp{width:60px;height:60px;font-size:28px;right:15px;bottom:15px;}
       #backTop{left:15px;bottom:15px;width:50px;height:50px;}
+    }
+
+    /*====================================================
+    ORDER MODAL
+    ====================================================*/
+    .order-modal{
+      position:fixed;inset:0;z-index:9999;
+      display:none;align-items:center;justify-content:center;
+      padding:20px;
+      background:rgba(0,0,0,.75);backdrop-filter:blur(8px);
+    }
+    .order-modal.active{display:flex;}
+    .order-modal-content{
+      width:100%;max-width:520px;max-height:90vh;
+      background:#151515;border-radius:24px;
+      border:1px solid rgba(255,255,255,.08);
+      box-shadow:0 30px 60px rgba(0,0,0,.6);
+      display:flex;flex-direction:column;
+      position:relative;overflow:hidden;
+      animation:orderModalIn .35s ease;
+    }
+    @keyframes orderModalIn{from{opacity:0;transform:scale(.92) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+    .order-modal-close{
+      position:absolute;top:16px;right:16px;z-index:10;
+      width:38px;height:38px;border-radius:50%;border:none;
+      background:rgba(255,255,255,.08);color:#888;font-size:16px;
+      cursor:pointer;transition:.3s;
+      display:flex;align-items:center;justify-content:center;
+    }
+    .order-modal-close:hover{background:rgba(255,255,255,.15);color:#fff;}
+    .order-modal-header{
+      text-align:center;padding:30px 30px 0;
+    }
+    .order-brand-logo{
+      width:140px;height:auto;max-height:80px;
+      object-fit:contain;margin:0 auto 8px;display:block;
+      filter:drop-shadow(0 0 20px rgba(255,208,40,.2));
+    }
+    .order-brand-name{
+      font-family:var(--font-title);font-size:12px;
+      letter-spacing:4px;color:var(--primary);margin-bottom:8px;
+    }
+    .order-modal-header h2{
+      font-family:var(--font-title);font-size:30px;color:#fff;
+    }
+    .order-modal-body{
+      flex:1;overflow-y:auto;padding:20px 30px;
+    }
+    .order-section{margin-bottom:18px;}
+    .order-section-title{
+      font-family:var(--font-title);font-size:14px;
+      letter-spacing:3px;color:var(--primary);margin-bottom:10px;
+      padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.06);
+    }
+    .order-section-title i{margin-right:6px;font-size:12px;}
+    .order-modal-body input,.order-modal-body textarea,.order-modal-body select{
+      width:100%;padding:14px;margin-bottom:6px;
+      background:#1a1a1a;border:1px solid rgba(255,255,255,.08);
+      border-radius:12px;color:white;font-size:14px;
+      font-family:var(--font-body);outline:none;transition:.3s;
+    }
+    .order-modal-body input:focus,.order-modal-body textarea:focus{border-color:var(--primary);}
+    .order-modal-body textarea{resize:vertical;min-height:80px;}
+    .order-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .field-error{color:#ff5252;font-size:12px;min-height:0;margin-bottom:8px;display:none;}
+    .field-error.show{display:block;}
+    .order-pago-options{display:flex;gap:10px;margin-bottom:6px;}
+    .order-pago-option{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:13px;background:#1a1a1a;border:2px solid rgba(255,255,255,.08);
+      border-radius:12px;cursor:pointer;transition:.3s;font-size:13px;color:#888;
+    }
+    .order-pago-option:hover{border-color:rgba(255,208,40,.3);}
+    .order-pago-option.active{border-color:var(--primary);color:var(--primary);background:rgba(255,208,40,.06);}
+    .order-pago-option input{display:none;}
+    .order-gps-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:13px;margin-top:6px;margin-bottom:4px;
+      background:#1a1a1a;border:2px dashed rgba(255,255,255,.1);
+      border-radius:12px;cursor:pointer;transition:.3s;
+      font-size:13px;color:#777;font-family:var(--font-body);
+    }
+    .order-gps-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .order-gps-btn.active{border-color:#4caf50;color:#4caf50;border-style:solid;}
+    .order-gps-btn i{font-size:16px;}
+    .order-modal-footer{
+      display:flex;gap:10px;padding:16px 30px 24px;
+    }
+    .order-btn-back,.order-btn-next,.order-btn-send{
+      flex:1;padding:15px;border:none;border-radius:50px;
+      font-size:14px;font-weight:700;cursor:pointer;
+      transition:.3s;font-family:var(--font-body);
+      display:flex;align-items:center;justify-content:center;gap:8px;
+    }
+    .order-btn-back{
+      background:rgba(255,255,255,.08);color:#ccc;
+    }
+    .order-btn-back:hover{background:rgba(255,255,255,.15);color:#fff;}
+    .order-btn-next{
+      background:var(--primary);color:#111;
+    }
+    .order-btn-next:hover{background:#ffe46d;transform:translateY(-2px);}
+    .order-btn-send{
+      background:#25d366;color:#fff;
+    }
+    .order-btn-send:hover{background:#20bd5a;transform:translateY(-2px);}
+
+    /* Summary card */
+    .order-summary-card{
+      background:#1a1a1a;border-radius:16px;padding:20px;
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .order-summary-row{
+      display:flex;justify-content:space-between;
+      padding:7px 0;font-size:13px;color:#bbb;
+    }
+    .order-summary-row .label{color:#888;}
+    .order-summary-row .value{color:#fff;font-weight:600;text-align:right;max-width:55%;}
+    .order-summary-divider{
+      border:none;border-top:1px solid rgba(255,255,255,.06);
+      margin:10px 0;
+    }
+    .order-summary-products{margin:10px 0;}
+    .order-summary-product{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:6px 0;font-size:13px;color:#ddd;
+    }
+    .order-summary-product .qty{color:var(--primary);font-weight:600;margin-right:8px;}
+    .order-summary-product .extra{font-size:11px;color:#666;padding-left:20px;}
+    .order-summary-total{
+      display:flex;justify-content:space-between;
+      padding:12px 0 0;margin-top:8px;
+      border-top:2px solid rgba(255,208,40,.3);
+      font-size:18px;font-weight:700;color:var(--primary);
+    }
+
+    @media(max-width:600px){
+      .order-modal-content{max-height:95vh;border-radius:20px;}
+      .order-modal-header{padding:24px 20px 0;}
+      .order-modal-header h2{font-size:24px;}
+      .order-modal-body{padding:16px 20px;}
+      .order-modal-footer{padding:12px 20px 20px;flex-direction:column;}
+      .order-row{grid-template-columns:1fr;}
+      .order-pago-options{flex-direction:column;}
     }
 
     /*====================================================
@@ -822,23 +976,6 @@
     /*========================
     SLIDER
     ========================*/
-    .prev-slide,.next-slide{
-      position:absolute;top:50%;transform:translateY(-50%);
-      background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.15);
-      color:white;width:50px;height:50px;border-radius:50%;
-      font-size:18px;cursor:pointer;transition:.3s;z-index:5;
-      display:flex;align-items:center;justify-content:center;
-    }
-    .prev-slide:hover,.next-slide:hover{background:var(--primary);color:#111;}
-    .prev-slide{left:25px;}
-    .next-slide{right:25px;}
-    .hero-dots{display:flex;justify-content:center;gap:12px;margin-top:35px;}
-    .dot{
-      width:12px;height:12px;border-radius:50%;
-      background:rgba(255,255,255,.25);cursor:pointer;transition:.3s;
-    }
-    .dot.active{background:var(--primary);transform:scale(1.3);}
-
     /*========================
     EFFECTS
     ========================*/
@@ -953,20 +1090,19 @@
   </header>
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="hero-content hidden">
-      <img class="hero-logo" src="img/logo-marca.png" alt="Logo" loading="lazy" decoding="async">
-      <h1>MEDIO URBANO</h1>
-      <h2>FAST FOOD</h2>
-      <p>Comida rápida con estilo urbano</p>
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <img class="hero-logo hero-logo-dynamic" src="img/logo-marca.png" alt="Logo" loading="lazy" decoding="async">
+      <h1 class="hero-title-dynamic">MEDIO URBANO</h1>
+      <h2 class="hero-subtitle-dynamic">FAST FOOD</h2>
+      <p class="hero-text-dynamic">Comida rápida con estilo urbano</p>
       <div class="hero-buttons">
-        <button type="button" class="btn-primary" id="btnVerMenu">Ver Menú</button>
-        <a href="https://wa.me/529983852946" target="_blank" class="btn-secondary">WhatsApp</a>
+        <button type="button" class="btn-primary" onclick="document.querySelector('#marcas').scrollIntoView({behavior:'smooth'})">EXPLORAR MENÚ</button>
       </div>
-      <div class="hero-dots"></div>
+      <div class="hero-scroll-indicator">
+        <div class="scroll-line"></div>
+      </div>
     </div>
-    <button type="button" class="prev-slide"><i class="fas fa-chevron-left"></i></button>
-    <button type="button" class="next-slide"><i class="fas fa-chevron-right"></i></button>
   </section>
 
   <!-- BRANDS -->
@@ -1047,8 +1183,8 @@
     <div class="container">
       <div class="delivery-box">
         <h2>¿TIENES HAMBRE?</h2>
-        <p>Haz tu pedido por WhatsApp</p>
-        <a href="https://wa.me/529983852946" target="_blank" class="btn-brand">Ordenar Ahora</a>
+        <p>Agrega productos al carrito y haz tu pedido</p>
+        <button type="button" class="btn-brand" onclick="document.querySelector('#marcas').scrollIntoView({behavior:'smooth'})">Ver Menú</button>
       </div>
     </div>
   </section>
@@ -1122,13 +1258,102 @@
     </div>
   </div>
 
+  <!-- ORDER MODAL -->
+  <div class="order-modal" id="orderModal">
+    <div class="order-modal-content">
+      <button type="button" class="order-modal-close" id="orderModalClose"><i class="fas fa-times"></i></button>
+
+      <!-- STEP 1: FORM -->
+      <div class="order-step" id="orderStep1">
+        <div class="order-modal-header">
+          <img id="orderBrandLogo" class="order-brand-logo" src="" alt="" style="display:none;">
+          <div id="orderBrandName" class="order-brand-name"></div>
+          <h2>Pedido</h2>
+        </div>
+
+        <div class="order-modal-body">
+          <div class="order-section">
+            <div class="order-section-title"><i class="fas fa-user"></i> TUS DATOS</div>
+            <input type="text" id="orderCliente" placeholder="Nombre completo *" required>
+            <div class="field-error" id="errCliente"></div>
+            <input type="tel" id="orderTelefono" placeholder="WhatsApp *" required>
+            <div class="field-error" id="errTelefono"></div>
+          </div>
+
+          <div class="order-section">
+            <div class="order-section-title"><i class="fas fa-home"></i> DIRECCIÓN DE ENTREGA</div>
+            <input type="text" id="orderDireccion" placeholder="Calle y número *" required>
+            <div class="field-error" id="errDireccion"></div>
+            <div class="order-row">
+              <div><input type="text" id="orderColonia" placeholder="Colonia *" required><div class="field-error" id="errColonia"></div></div>
+              <div><input type="text" id="orderCp" placeholder="Código Postal"></div>
+            </div>
+            <input type="text" id="orderReferencias" placeholder="Referencias (casa color, portón, etc.)">
+            <button type="button" class="order-gps-btn" id="orderGpsBtn">
+              <i class="fas fa-location-crosshairs"></i>
+              <span>Compartir mi ubicación (opcional)</span>
+            </button>
+            <input type="hidden" id="orderGpsLat">
+            <input type="hidden" id="orderGpsLng">
+          </div>
+
+          <div class="order-section">
+            <div class="order-section-title"><i class="fas fa-credit-card"></i> MÉTODO DE PAGO</div>
+            <div class="order-pago-options">
+              <label class="order-pago-option active" onclick="selectOrderPago(this,'Efectivo')">
+                <input type="radio" name="orderPago" value="Efectivo" checked>
+                <i class="fas fa-money-bill-wave"></i> Efectivo
+              </label>
+              <label class="order-pago-option" onclick="selectOrderPago(this,'Transferencia')">
+                <input type="radio" name="orderPago" value="Transferencia">
+                <i class="fas fa-university"></i> Transferencia
+              </label>
+            </div>
+            <div class="field-error" id="errPago"></div>
+          </div>
+
+          <div class="order-section">
+            <div class="order-section-title"><i class="fas fa-comment-dots"></i> OBSERVACIONES</div>
+            <textarea id="orderComentarios" placeholder="Sin cebolla, poco picante, marcar al llegar..."></textarea>
+          </div>
+        </div>
+
+        <div class="order-modal-footer">
+          <button type="button" class="order-btn-back" onclick="closeOrderModal()">
+            <i class="fas fa-arrow-left"></i> Volver al Carrito
+          </button>
+          <button type="button" class="order-btn-next" id="orderBtnContinue">
+            Continuar <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: SUMMARY -->
+      <div class="order-step" id="orderStep2" style="display:none;">
+        <div class="order-modal-header">
+          <img id="orderBrandLogo2" class="order-brand-logo" src="" alt="" style="display:none;">
+          <div id="orderBrandName2" class="order-brand-name"></div>
+          <h2>Resumen del Pedido</h2>
+        </div>
+
+        <div class="order-modal-body">
+          <div class="order-summary-card" id="orderSummaryCard"></div>
+        </div>
+
+        <div class="order-modal-footer">
+          <button type="button" class="order-btn-back" id="orderBtnEdit">
+            <i class="fas fa-arrow-left"></i> Editar Información
+          </button>
+          <button type="button" class="order-btn-send" id="orderBtnSend">
+            <i class="fab fa-whatsapp"></i> Enviar Pedido
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- OVERLAY -->
   <div class="overlay"></div>
-
-  <!-- FLOATING WHATSAPP -->
-  <a class="floating-whatsapp" href="https://wa.me/529983852946" target="_blank">
-    <i class="fab fa-whatsapp"></i>
-  </a>
 
   <!-- BACK TO TOP -->
   <button type="button" id="backTop"><i class="fas fa-arrow-up"></i></button>
@@ -1195,11 +1420,6 @@
       });
     });
 
-    // BTN VER MENU SCROLL
-    document.getElementById("btnVerMenu").addEventListener("click",()=>{
-      document.querySelector("#marcas").scrollIntoView({behavior:"smooth"});
-    });
-
     //====================================================
     // menu.js - MEDIO URBANO V3
     //====================================================
@@ -1239,7 +1459,8 @@
             nombre:p.nombre,
             descripcion:p.descripcion,
             precio:Number(p.precio)||0,
-            imagen:p.imagen
+            imagen:p.imagen,
+            categoria:p.categoria
           });
         }
       });
@@ -1456,19 +1677,268 @@
         alert("Tu carrito está vacío.");
         return;
       }
-      let mensaje="🍔 *PEDIDO MEDIO URBANO*%0A%0A";
-      carrito.forEach(item=>{
-        mensaje+=`• ${item.nombre} x${item.cantidad} - $${item.precio*item.cantidad}%0A`;
-      });
-      mensaje+="%0A";
-      mensaje+="💰 Total: $"+calcularTotal().toFixed(2);
-      const numero="529983852946";
-      window.open(`https://wa.me/${numero}?text=${mensaje}`,"_blank");
+      openOrderModal();
     }
 
     document.querySelector(".cart-footer .btn-primary").addEventListener("click",finalizarPedido);
 
     window.addEventListener("load",cargarCarrito);
+
+    //====================================================
+    // ORDER MODAL
+    //====================================================
+
+    let orderGpsData=null;
+
+    function detectOrderBrand(){
+      const map={cocina:"cocina",salad:"salad",burgers:"burgers",pasta:"pasta"};
+      for(const item of carrito){
+        if(item.categoria&&map[item.categoria]) return item.categoria;
+      }
+      return null;
+    }
+
+    function openOrderModal(){
+      const modal=document.getElementById("orderModal");
+      const step1=document.getElementById("orderStep1");
+      const step2=document.getElementById("orderStep2");
+      step1.style.display="";
+      step2.style.display="none";
+      modal.classList.add("active");
+      document.body.style.overflow="hidden";
+      loadOrderBrandLogo();
+      orderGpsData=null;
+      document.getElementById("orderGpsLat").value="";
+      document.getElementById("orderGpsLng").value="";
+      const gpsBtn=document.getElementById("orderGpsBtn");
+      gpsBtn.classList.remove("active");
+      gpsBtn.querySelector("span").textContent="Compartir mi ubicación (opcional)";
+      clearOrderErrors();
+    }
+
+    function closeOrderModal(){
+      const modal=document.getElementById("orderModal");
+      modal.classList.remove("active");
+      document.body.style.overflow="";
+    }
+
+    function loadOrderBrandLogo(){
+      const brand=detectOrderBrand();
+      const logo1=document.getElementById("orderBrandLogo");
+      const name1=document.getElementById("orderBrandName");
+      const logo2=document.getElementById("orderBrandLogo2");
+      const name2=document.getElementById("orderBrandName2");
+      if(!brand){
+        logo1.style.display="none";name1.textContent="";
+        logo2.style.display="none";name2.textContent="";
+        return;
+      }
+      const label="MEDIO URBANO "+brand.toUpperCase();
+      name1.textContent=label;
+      name2.textContent=label;
+      if(typeof firebase!=="undefined"&&firebase.firestore){
+        firebase.firestore().collection("config").doc("logos").get()
+          .then(doc=>{
+            if(doc.exists&&doc.data()[brand]){
+              logo1.src=doc.data()[brand];logo1.alt=label;logo1.style.display="block";
+              logo2.src=doc.data()[brand];logo2.alt=label;logo2.style.display="block";
+            }
+          }).catch(()=>{});
+      }
+    }
+
+    function selectOrderPago(el,value){
+      document.querySelectorAll(".order-pago-option").forEach(o=>o.classList.remove("active"));
+      el.classList.add("active");
+      el.querySelector("input").checked=true;
+    }
+
+    function clearOrderErrors(){
+      document.querySelectorAll(".field-error").forEach(e=>{e.textContent="";e.classList.remove("show");});
+    }
+
+    function showOrderError(id,msg){
+      const el=document.getElementById(id);
+      if(el){el.textContent=msg;el.classList.add("show");}
+    }
+
+    function orderGPS(){
+      const btn=document.getElementById("orderGpsBtn");
+      if(orderGpsData){
+        orderGpsData=null;
+        document.getElementById("orderGpsLat").value="";
+        document.getElementById("orderGpsLng").value="";
+        btn.classList.remove("active");
+        btn.querySelector("span").textContent="Compartir mi ubicación (opcional)";
+        return;
+      }
+      if(!navigator.geolocation){alert("Tu navegador no soporta geolocalización.");return;}
+      btn.querySelector("span").textContent="Obteniendo ubicación...";
+      navigator.geolocation.getCurrentPosition(
+        pos=>{
+          orderGpsData={lat:pos.coords.latitude,lng:pos.coords.longitude};
+          document.getElementById("orderGpsLat").value=orderGpsData.lat;
+          document.getElementById("orderGpsLng").value=orderGpsData.lng;
+          btn.classList.add("active");
+          btn.querySelector("span").textContent="Ubicación capturada ✓ Toca para quitar";
+        },
+        ()=>{
+          btn.querySelector("span").textContent="No se pudo obtener ubicación";
+          setTimeout(()=>{btn.querySelector("span").textContent="Compartir mi ubicación (opcional)";},2000);
+        },
+        {enableHighAccuracy:true,timeout:10000}
+      );
+    }
+
+    function orderValidate(){
+      clearOrderErrors();
+      let ok=true;
+      const v=(id,msg)=>{const el=document.getElementById(id);if(!el.value.trim()){showOrderError("err"+id.replace("order",""),msg);ok=false;}};
+      if(!document.getElementById("orderCliente").value.trim()){showOrderError("errCliente","Ingresa tu nombre");ok=false;}
+      if(!document.getElementById("orderTelefono").value.trim()){showOrderError("errTelefono","Ingresa tu WhatsApp");ok=false;}
+      if(!document.getElementById("orderDireccion").value.trim()){showOrderError("errDireccion","Ingresa tu dirección");ok=false;}
+      if(!document.getElementById("orderColonia").value.trim()){showOrderError("errColonia","Ingresa tu colonia");ok=false;}
+      if(!document.querySelector('input[name="orderPago"]:checked')){showOrderError("errPago","Selecciona método de pago");ok=false;}
+      return ok;
+    }
+
+    function buildOrderSummary(){
+      const brand=detectOrderBrand()||"general";
+      const brandLabel=brand.charAt(0).toUpperCase()+brand.slice(1);
+      const cliente=document.getElementById("orderCliente").value.trim();
+      const telefono=document.getElementById("orderTelefono").value.trim();
+      const direccion=document.getElementById("orderDireccion").value.trim();
+      const colonia=document.getElementById("orderColonia").value.trim();
+      const cp=document.getElementById("orderCp").value.trim();
+      const referencias=document.getElementById("orderReferencias").value.trim();
+      const pago=document.querySelector('input[name="orderPago"]:checked').value;
+      const comentarios=document.getElementById("orderComentarios").value.trim();
+
+      let html="";
+      html+=`<div class="order-summary-row"><span class="label">Cliente</span><span class="value">${cliente}</span></div>`;
+      html+=`<div class="order-summary-row"><span class="label">WhatsApp</span><span class="value">${telefono}</span></div>`;
+      html+=`<div class="order-summary-row"><span class="label">Dirección</span><span class="value">${direccion}</span></div>`;
+      if(colonia) html+=`<div class="order-summary-row"><span class="label">Colonia</span><span class="value">${colonia}</span></div>`;
+      if(cp) html+=`<div class="order-summary-row"><span class="label">CP</span><span class="value">${cp}</span></div>`;
+      if(referencias) html+=`<div class="order-summary-row"><span class="label">Referencias</span><span class="value">${referencias}</span></div>`;
+      html+=`<div class="order-summary-row"><span class="label">Pago</span><span class="value">${pago}</span></div>`;
+      if(orderGpsData) html+=`<div class="order-summary-row"><span class="label">Ubicación</span><span class="value"><a href="https://maps.google.com/?q=${orderGpsData.lat},${orderGpsData.lng}" target="_blank" style="color:var(--primary);text-decoration:underline;">Ver en mapa</a></span></div>`;
+
+      html+=`<hr class="order-summary-divider">`;
+      html+=`<div class="order-summary-products">`;
+      let total=0;
+      carrito.forEach(item=>{
+        const sub=item.precio*item.cantidad;
+        total+=sub;
+        html+=`<div class="order-summary-product"><span><span class="qty">x${item.cantidad}</span>${item.nombre}</span><span>$${sub.toFixed(2)}</span></div>`;
+        if(item.extras&&item.extras.length){
+          html+=`<div class="order-summary-product extra"><span class="extra"><i class="fas fa-plus-circle"></i> ${item.extras.join(", ")}</span></div>`;
+        }
+      });
+      html+=`</div>`;
+
+      html+=`<div class="order-summary-row"><span class="label">Envío</span><span class="value" style="color:var(--primary);">A convenir</span></div>`;
+      html+=`<div class="order-summary-total"><span>TOTAL</span><span>$${total.toFixed(2)} MXN</span></div>`;
+
+      if(comentarios){
+        html+=`<hr class="order-summary-divider">`;
+        html+=`<div class="order-summary-row"><span class="label">Observaciones</span><span class="value">${comentarios}</span></div>`;
+      }
+
+      document.getElementById("orderSummaryCard").innerHTML=html;
+    }
+
+    function buildWhatsAppMessage(){
+      const brand=detectOrderBrand()||"general";
+      const brandLabel=brand.charAt(0).toUpperCase()+brand.slice(1);
+      const cliente=document.getElementById("orderCliente").value.trim();
+      const telefono=document.getElementById("orderTelefono").value.trim();
+      const direccion=document.getElementById("orderDireccion").value.trim();
+      const colonia=document.getElementById("orderColonia").value.trim();
+      const cp=document.getElementById("orderCp").value.trim();
+      const referencias=document.getElementById("orderReferencias").value.trim();
+      const pago=document.querySelector('input[name="orderPago"]:checked').value;
+      const comentarios=document.getElementById("orderComentarios").value.trim();
+
+      let msg="🍔 *PEDIDO - MEDIO URBANO "+brandLabel.toUpperCase()+"*\n\n";
+      msg+="━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg+="👤 *Cliente*\n"+cliente+"\n\n";
+      msg+="📱 *WhatsApp*\n"+telefono+"\n\n";
+      msg+="🏠 *Dirección*\n"+direccion+"\n";
+      if(colonia) msg+="Colonia "+colonia+"\n";
+      if(cp) msg+="CP "+cp+"\n";
+      if(referencias) msg+="Referencias: "+referencias+"\n";
+      msg+="\n";
+      if(orderGpsData) msg+="📍 *Ubicación*\nhttps://maps.google.com/?q="+orderGpsData.lat+","+orderGpsData.lng+"\n\n";
+      msg+="💳 *Método de pago*\n"+pago+"\n\n";
+      msg+="━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg+="🛒 *PEDIDO*\n\n";
+      carrito.forEach(item=>{
+        msg+=item.cantidad+"x "+item.nombre+" - $"+(item.precio*item.cantidad).toFixed(2)+"\n";
+        if(item.extras&&item.extras.length) msg+="  Extra: "+item.extras.join(", ")+"\n";
+      });
+      let total=carrito.reduce((s,i)=>s+i.precio*i.cantidad,0);
+      msg+="\n━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg+="💲 *TOTAL: $"+total.toFixed(2)+" MXN*\n\n";
+      msg+="━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      if(comentarios){
+        msg+="📝 *Observaciones*\n"+comentarios+"\n\n";
+        msg+="━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      }
+      msg+="Gracias por elegir Medio Urbano. 🙏";
+      return msg;
+    }
+
+    function sendOrderToWhatsApp(){
+      const msg=buildWhatsAppMessage();
+      const numero="529983852946";
+
+      if(typeof firebase!=="undefined"&&firebase.firestore){
+        const brand=detectOrderBrand()||"general";
+        firebase.firestore().collection("pedidos").add({
+          cliente:document.getElementById("orderCliente").value.trim(),
+          telefono:document.getElementById("orderTelefono").value.trim(),
+          direccion:document.getElementById("orderDireccion").value.trim(),
+          colonia:document.getElementById("orderColonia").value.trim(),
+          cp:document.getElementById("orderCp").value.trim(),
+          referencias:document.getElementById("orderReferencias").value.trim(),
+          productos:carrito,
+          pago:document.querySelector('input[name="orderPago"]:checked').value,
+          comentarios:document.getElementById("orderComentarios").value.trim(),
+          total:carrito.reduce((s,i)=>s+i.precio*i.cantidad,0),
+          marca:brand,
+          gpsLat:orderGpsData?orderGpsData.lat:null,
+          gpsLng:orderGpsData?orderGpsData.lng:null,
+          estado:"Pendiente",
+          fecha:new Date().toISOString()
+        }).catch(()=>{});
+      }
+
+      localStorage.removeItem("medioUrbanoCart");
+      carrito=[];
+      window.open("https://wa.me/"+numero+"?text="+encodeURIComponent(msg),"_blank");
+      closeOrderModal();
+      renderCarrito();
+      setTimeout(()=>{window.location="test.html";},1000);
+    }
+
+    document.getElementById("orderModalClose").addEventListener("click",closeOrderModal);
+    document.getElementById("orderModal").addEventListener("click",e=>{if(e.target===document.getElementById("orderModal"))closeOrderModal();});
+    document.getElementById("orderGpsBtn").addEventListener("click",orderGPS);
+
+    document.getElementById("orderBtnContinue").addEventListener("click",()=>{
+      if(!orderValidate()) return;
+      buildOrderSummary();
+      document.getElementById("orderStep1").style.display="none";
+      document.getElementById("orderStep2").style.display="";
+    });
+
+    document.getElementById("orderBtnEdit").addEventListener("click",()=>{
+      document.getElementById("orderStep2").style.display="none";
+      document.getElementById("orderStep1").style.display="";
+    });
+
+    document.getElementById("orderBtnSend").addEventListener("click",sendOrderToWhatsApp);
 
     //====================================================
     // REVEAL OBSERVER
@@ -1512,7 +1982,7 @@
     const yearEl=document.getElementById("year");if(yearEl) yearEl.textContent=new Date().getFullYear();
     // FIN
   </script>
-  <script src="js/slider.js"></script>
+  <script src="js/slider.js?v=2"></script>
   <script src="js/effects.js"></script>
   <script src="js/notifications.js"></script>
   <script src="js/search.js"></script>
@@ -1529,7 +1999,7 @@
           if(!doc.exists) return;
           const logos=doc.data();
           const mapping={
-            marca:[".hero-logo","header .logo img",".footer-brand img"],
+            header:["header .logo img",".footer-brand img"],
             cocina:[".brand[data-categoria='cocina'] img"],
             salad:[".brand[data-categoria='salad'] img"],
             burgers:[".brand[data-categoria='burgers'] img"],
@@ -1542,6 +2012,18 @@
               });
             }
           });
+          // Hero logo por horario desde Firestore
+          const now=new Date();
+          const h=now.getHours();
+          const d=now.getDay();
+          let heroKey="marca";
+          if(d>=1&&d<=5&&h>=10&&h<15) heroKey="cocina";
+          else if(d>=1&&d<=6&&(h>=20||h<0)) heroKey="burgers";
+          if(logos[heroKey]){
+            document.querySelectorAll(".hero-logo-dynamic").forEach(img=>{img.src=logos[heroKey];});
+          }else if(logos.marca){
+            document.querySelectorAll(".hero-logo-dynamic").forEach(img=>{img.src=logos.marca;});
+          }
         }).catch(()=>{});
     }
     setTimeout(loadBrandLogosFromFirestore,1500);

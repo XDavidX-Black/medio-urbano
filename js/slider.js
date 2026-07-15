@@ -1,78 +1,75 @@
 /*====================================================
-slider.js - MEDIO URBANO V3 - Hero Rotativo
-====================================================*/
+slider.js - MEDIO URBANO V3 - Hero por Horario
+Horarios reales:
+  Cocina/Salad: Lun-Vie 10:00-15:00
+  Burgers/Pasta: Lun-Sab 20:00-00:00 (Próximamente)
+  Fuera de horario: Marca general
+=====================================================*/
 
-const slides=[
-  {titulo:"MEDIO URBANO",subtitulo:"UN SOLO LUGAR · CUATRO EXPERIENCIAS",texto:"Descubre Cocina, Salad, Burgers y Pasta.",imagen:"img/hero/hero1.webp"},
-  {titulo:"COCINA",subtitulo:"SABOR CASERO",texto:"Comida preparada diariamente.",imagen:"img/hero/cocina.webp"},
-  {titulo:"SALAD",subtitulo:"FRESCO Y SALUDABLE",texto:"Ingredientes frescos todos los días.",imagen:"img/hero/salad.webp"},
-  {titulo:"BURGERS",subtitulo:"PRÓXIMAMENTE",texto:"Estamos preparando algo increíble.",imagen:"img/hero/burgers.webp"},
-  {titulo:"PASTA",subtitulo:"PRÓXIMAMENTE",texto:"Muy pronto una nueva experiencia.",imagen:"img/hero/pasta.webp"}
-];
+const heroConfig = {
+  marca: {
+    logo: "img/logo-marca.png",
+    title: "MEDIO URBANO",
+    subtitle: "FAST FOOD",
+    text: "Comida rápida con estilo urbano"
+  },
+  cocina: {
+    logo: "img/logo-cocina.png",
+    title: "¿HOY NO QUIERES COCINAR?",
+    subtitle: "MEDIO URBANO COCINA · SALAD",
+    text: "Nosotros nos encargamos"
+  },
+  burgers: {
+    logo: "img/logo-burgers.png",
+    title: "PRÓXIMAMENTE",
+    subtitle: "MEDIO URBANO BURGERS · PASTA",
+    text: "Estamos preparando algo increíble"
+  }
+};
 
-let slideActual=0;
+function getHeroBySchedule() {
+  const now = new Date();
+  const h = now.getHours();
+  const day = now.getDay(); // 0=Dom, 1=Lun...6=Sab
 
-function cambiarSlide(indice){
-  const slide=slides[indice];
-  const hero=document.querySelector(".hero");
-  const heroTitle=document.querySelector(".hero h1");
-  const heroSubtitle=document.querySelector(".hero h2");
-  const heroText=document.querySelector(".hero p");
-  hero.style.backgroundImage=`linear-gradient(rgba(0,0,0,.75),rgba(0,0,0,.88)),url(${slide.imagen})`;
-  heroTitle.style.opacity=0;
-  heroSubtitle.style.opacity=0;
-  heroText.style.opacity=0;
-  setTimeout(()=>{
-    heroTitle.innerHTML=slide.titulo;
-    heroSubtitle.innerHTML=slide.subtitulo;
-    heroText.innerHTML=slide.texto;
-    heroTitle.style.opacity=1;
-    heroSubtitle.style.opacity=1;
-    heroText.style.opacity=1;
-  },300);
+  // Cocina + Salad: Lun-Vie (1-5), 10:00-15:00
+  if (day >= 1 && day <= 5 && h >= 10 && h < 15) {
+    return heroConfig.cocina;
+  }
+
+  // Burgers + Pasta: Lun-Sab (1-6), 20:00-00:00
+  if (day >= 1 && day <= 6 && (h >= 20 || h < 0)) {
+    return heroConfig.burgers;
+  }
+
+  // Fuera de horario: marca general
+  return heroConfig.marca;
 }
 
-function siguienteSlide(){
-  slideActual++;
-  if(slideActual>=slides.length) slideActual=0;
-  cambiarSlide(slideActual);
-  actualizarDots();
+function applyHeroConfig(config) {
+  const logo = document.querySelector(".hero-logo-dynamic");
+  const title = document.querySelector(".hero-title-dynamic");
+  const subtitle = document.querySelector(".hero-subtitle-dynamic");
+  const text = document.querySelector(".hero-text-dynamic");
+
+  if (logo) logo.src = config.logo;
+  if (title) title.textContent = config.title;
+  if (subtitle) subtitle.textContent = config.subtitle;
+  if (text) text.textContent = config.text;
 }
 
-function anteriorSlide(){
-  slideActual--;
-  if(slideActual<0) slideActual=slides.length-1;
-  cambiarSlide(slideActual);
-  actualizarDots();
-}
-
-setInterval(siguienteSlide,7000);
-
-const next=document.querySelector(".next-slide");
-const prev=document.querySelector(".prev-slide");
-if(next) next.addEventListener("click",siguienteSlide);
-if(prev) prev.addEventListener("click",anteriorSlide);
-
-// INDICADORES
-const indicadores=document.querySelector(".hero-dots");
-if(indicadores){
-  slides.forEach((_,index)=>{
-    const dot=document.createElement("span");
-    dot.classList.add("dot");
-    if(index===0) dot.classList.add("active");
-    dot.addEventListener("click",()=>{
-      slideActual=index;
-      cambiarSlide(index);
-      actualizarDots();
-    });
-    indicadores.appendChild(dot);
+function animateHeroIn() {
+  const elements = document.querySelectorAll(".hero-logo-dynamic, .hero-title-dynamic, .hero-subtitle-dynamic, .hero-text-dynamic, .hero-buttons, .hero-scroll-indicator");
+  elements.forEach((el, i) => {
+    el.classList.add("hero-fade-in");
+    setTimeout(() => el.classList.add("visible"), 100 + i * 300);
   });
 }
 
-function actualizarDots(){
-  document.querySelectorAll(".dot").forEach((dot,index)=>{
-    dot.classList.toggle("active",index===slideActual);
-  });
+function initHero() {
+  const config = getHeroBySchedule();
+  applyHeroConfig(config);
+  animateHeroIn();
 }
 
-window.addEventListener("load",()=>{cambiarSlide(0);});
+window.addEventListener("load", initHero);

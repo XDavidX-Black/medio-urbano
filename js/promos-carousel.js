@@ -70,8 +70,24 @@ carrusel dentro de la sección existente #promociones
         </div>
       `;
       slide.addEventListener("click",()=>{
-        const msg="Hola! Me interesa la promoción: "+p.titulo+(p.precio?" - "+p.precio:"")+(p.marca?" ("+p.marca+")":"");
-        window.open("https://wa.me/529983852946?text="+encodeURIComponent(msg),"_blank");
+        let cart=JSON.parse(localStorage.getItem("medioUrbanoCart"))||[];
+        cart.push({
+          id:"promo_"+(p.id||Date.now()),
+          nombre:p.titulo+(p.precio?" - "+p.precio:""),
+          precio:0,
+          cantidad:1,
+          imagen:p.imagen||"",
+          marca:p.marca||"MEDIO URBANO",
+          categoria:(p.marca||"").toLowerCase(),
+          extras:[]
+        });
+        localStorage.setItem("medioUrbanoCart",JSON.stringify(cart));
+        if(typeof openOrderModal==="function"){
+          carrito=cart;
+          openOrderModal();
+        }else{
+          window.location.href="pedido.html";
+        }
       });
       track.appendChild(slide);
     });

@@ -17,72 +17,120 @@
     header{padding:20px 40px;background:rgba(8,8,8,.95);border-bottom:1px solid rgba(255,255,255,.06);}
     header .container{display:flex;align-items:center;justify-content:space-between;}
     .logo img{height:55px;}
-    .pedido-page{min-height:calc(100vh - 100px);display:flex;align-items:center;justify-content:center;padding:60px 20px;}
+    .pedido-page{min-height:calc(100vh - 100px);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px 80px;}
     .pedido-box{
-      width:100%;max-width:500px;background:#151515;
-      border-radius:25px;padding:50px 40px;
+      width:100%;max-width:520px;background:#151515;
+      border-radius:25px;padding:45px 35px;
       box-shadow:0 25px 50px rgba(0,0,0,.45);
       border:1px solid rgba(255,255,255,.06);
       text-align:center;
     }
     .pedido-brand-logo{
-      width:180px;height:auto;max-height:100px;
-      object-fit:contain;margin:0 auto 10px;display:block;
+      width:160px;height:auto;max-height:90px;
+      object-fit:contain;margin:0 auto 8px;display:block;
+      filter:drop-shadow(0 0 20px rgba(255,208,40,.25));
     }
     .pedido-brand-name{
-      font-family:var(--font-title);font-size:14px;
-      letter-spacing:3px;color:var(--primary);margin-bottom:5px;
+      font-family:var(--font-title);font-size:13px;
+      letter-spacing:4px;color:var(--primary);margin-bottom:20px;
     }
     .pedido-box h1{
-      font-family:var(--font-title);font-size:48px;
-      color:var(--primary);margin-bottom:10px;
+      font-family:var(--font-title);font-size:38px;
+      color:#fff;margin-bottom:6px;
     }
-    .pedido-box>p{text-align:center;color:#aaa;margin-bottom:35px;}
-    .pedido-box input,.pedido-box textarea{
-      width:100%;padding:16px;margin-bottom:15px;
-      background:#1f1f1f;border:1px solid rgba(255,255,255,.08);
-      border-radius:14px;color:white;font-size:15px;
+    .pedido-box>p{text-align:center;color:#888;margin-bottom:30px;font-size:14px;}
+    .pedido-box input,.pedido-box textarea,.pedido-box select{
+      width:100%;padding:15px;margin-bottom:14px;
+      background:#1a1a1a;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;color:white;font-size:14px;
       font-family:var(--font-body);outline:none;transition:.3s;
     }
-    .pedido-box input:focus,.pedido-box textarea:focus{border-color:var(--primary);}
+    .pedido-box input:focus,.pedido-box textarea:focus,.pedido-box select:focus{border-color:var(--primary);}
     .pedido-box textarea{resize:vertical;min-height:100px;}
-    .pedido-box button{
-      width:100%;padding:18px;margin-top:10px;font-size:16px;
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .form-row .full{grid-column:1/-1;}
+    .form-section{margin-bottom:20px;text-align:left;}
+    .form-section-title{
+      font-family:var(--font-title);font-size:16px;
+      letter-spacing:3px;color:var(--primary);margin-bottom:12px;
+      padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.06);
     }
-    .pedido-box .btn-primary{
+    .form-section-title i{margin-right:8px;font-size:14px;}
+
+    /* Pago */
+    .pago-options{display:flex;gap:12px;margin-bottom:14px;}
+    .pago-option{
+      flex:1;display:flex;align-items:center;justify-content:center;gap:8px;
+      padding:14px;background:#1a1a1a;border:2px solid rgba(255,255,255,.08);
+      border-radius:14px;cursor:pointer;transition:.3s;font-size:14px;color:#aaa;
+    }
+    .pago-option:hover{border-color:rgba(255,208,40,.3);}
+    .pago-option.active{border-color:var(--primary);color:var(--primary);background:rgba(255,208,40,.06);}
+    .pago-option input{display:none;}
+    .pago-option i{font-size:20px;}
+
+    /* GPS */
+    .gps-btn{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;padding:14px;margin-bottom:14px;
+      background:#1a1a1a;border:2px dashed rgba(255,255,255,.12);
+      border-radius:14px;cursor:pointer;transition:.3s;
+      font-size:14px;color:#888;font-family:var(--font-body);
+    }
+    .gps-btn:hover{border-color:var(--primary);color:var(--primary);}
+    .gps-btn.active{border-color:#4caf50;color:#4caf50;border-style:solid;}
+    .gps-btn i{font-size:18px;}
+
+    /* Resumen */
+    .pedido-summary{margin-bottom:25px;text-align:left;}
+    .pedido-summary h3{
+      font-family:var(--font-title);font-size:20px;
+      color:var(--primary);margin-bottom:12px;letter-spacing:2px;
+    }
+    .pedido-summary .item{
+      display:flex;justify-content:space-between;align-items:center;
+      padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05);
+      font-size:13px;
+    }
+    .pedido-summary .item-name{flex:1;color:#ddd;}
+    .pedido-summary .item-qty{color:#888;margin:0 10px;font-size:12px;}
+    .pedido-summary .item-price{color:var(--primary);font-weight:600;white-space:nowrap;}
+    .pedido-summary .item-extra{font-size:11px;color:#666;padding-left:10px;}
+    .pedido-summary .envio{
+      display:flex;justify-content:space-between;
+      padding:10px 0;font-size:13px;color:#888;
+    }
+    .pedido-summary .total-line{
+      display:flex;justify-content:space-between;
+      padding:14px 0 0;margin-top:8px;
+      border-top:2px solid rgba(255,208,40,.3);
+      font-size:20px;font-weight:700;color:var(--primary);
+    }
+
+    .btn-submit{
       width:100%;padding:18px;border:none;border-radius:50px;
       background:var(--primary);color:#111;font-size:16px;
       font-weight:700;cursor:pointer;transition:.35s;
-      font-family:var(--font-body);
+      font-family:var(--font-body);margin-top:10px;
     }
-    .pedido-box .btn-primary:hover{background:#ffe46d;transform:translateY(-4px);}
-    .pedido-summary{margin-bottom:30px;text-align:left;}
-    .pedido-summary h3{font-family:var(--font-title);font-size:24px;color:var(--primary);margin-bottom:15px;}
-    .pedido-summary .item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
-    .pedido-summary .total{text-align:right;font-size:20px;font-weight:700;color:var(--primary);margin-top:15px;}
-    .metodo-pago{margin-bottom:15px;text-align:left;}
-    .metodo-pago label{display:block;color:#aaa;font-size:13px;margin-bottom:8px;}
-    .metodo-pago select{width:100%;padding:14px;background:#1f1f1f;border:1px solid rgba(255,255,255,.08);border-radius:14px;color:white;font-size:15px;font-family:var(--font-body);outline:none;}
-    .extras-group{text-align:left;margin-bottom:15px;}
-    .extras-group label{display:block;color:#aaa;font-size:13px;margin-bottom:8px;}
-    .extras-group .extras-list{display:flex;flex-wrap:wrap;gap:8px;}
-    .extras-group .extras-list label{
-      display:flex;align-items:center;gap:6px;
-      padding:8px 14px;background:#1f1f1f;border-radius:10px;
-      cursor:pointer;font-size:13px;color:#ccc;
-      border:1px solid rgba(255,255,255,.06);transition:.2s;
+    .btn-submit:hover{background:#ffe46d;transform:translateY(-3px);}
+    .btn-submit:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+    .empty-msg{color:#555;text-align:center;padding:30px 0;font-size:14px;}
+
+    @media(max-width:600px){
+      .pedido-box{padding:30px 20px;border-radius:20px;}
+      .pedido-box h1{font-size:30px;}
+      .form-row{grid-template-columns:1fr;}
+      .pago-options{flex-direction:column;}
     }
-    .extras-group .extras-list label:has(input:checked){
-      border-color:var(--primary);color:var(--primary);
-      background:rgba(255,208,40,.08);
-    }
-    .extras-group .extras-list input[type="checkbox"]{accent-color:var(--primary);}
   </style>
 </head>
 <body>
   <header>
     <div class="container">
       <a href="test.html" class="logo"><img src="img/logo-marca.png" alt="Medio Urbano"></a>
+      <a href="test.html" style="color:#888;font-size:14px;text-decoration:none;display:flex;align-items:center;gap:8px;transition:.3s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='#888'"><i class="fas fa-arrow-left"></i> Volver</a>
     </div>
   </header>
   <section class="pedido-page">
@@ -90,124 +138,252 @@
       <div class="pedido-box">
         <img id="brandLogo" class="pedido-brand-logo" src="" alt="" style="display:none;">
         <div id="brandName" class="pedido-brand-name"></div>
-        <h1>Realiza Tu Pedido</h1>
-        <p>Completa tus datos para enviar tu pedido.</p>
+        <h1>Tu Pedido</h1>
+        <p>Completa tus datos para recibir tu pedido a domicilio.</p>
+
         <div class="pedido-summary" id="pedidoSummary"></div>
+
         <form id="pedidoForm">
-          <input type="text" id="cliente" placeholder="Nombre completo" required>
-          <input type="tel" id="telefono" placeholder="Teléfono" required>
-          <input type="text" id="direccion" placeholder="Dirección" required>
-          <div class="extras-group">
-            <label>Extras</label>
-            <div class="extras-list">
-              <label><input type="checkbox" name="extra" value="Tocino"> Tocino</label>
-              <label><input type="checkbox" name="extra" value="Queso"> Queso</label>
-              <label><input type="checkbox" name="extra" value="Jalapeños"> Jalapeños</label>
-              <label><input type="checkbox" name="extra" value="Guacamole"> Guacamole</label>
-              <label><input type="checkbox" name="extra" value="Papas"> Papas</label>
-              <label><input type="checkbox" name="extra" value="Ensalada"> Ensalada</label>
+          <!-- CLIENTE -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fas fa-user"></i> TUS DATOS</div>
+            <div class="form-row">
+              <input type="text" id="cliente" placeholder="Nombre completo *" required>
+              <input type="tel" id="telefono" placeholder="WhatsApp *" required>
             </div>
           </div>
-          <div class="metodo-pago">
-            <label>Método de pago</label>
-            <select id="pago">
-              <option value="Efectivo">Efectivo</option>
-              <option value="Transferencia">Transferencia</option>
-              <option value="Tarjeta">Tarjeta</option>
-            </select>
+
+          <!-- DIRECCION -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fas fa-home"></i> DIRECCIÓN DE ENTREGA</div>
+            <input type="text" id="direccion" placeholder="Calle y número *" required>
+            <div class="form-row">
+              <input type="text" id="colonia" placeholder="Colonia *" required>
+              <input type="text" id="cp" placeholder="Código Postal">
+            </div>
+            <input type="text" id="referencias" placeholder="Referencias del domicilio (casa color, portón, etc.)">
+
+            <button type="button" class="gps-btn" id="gpsBtn" onclick="compartirUbicacion()">
+              <i class="fas fa-location-crosshairs"></i>
+              <span>Compartir mi ubicación (opcional)</span>
+            </button>
+            <input type="hidden" id="gpsLat">
+            <input type="hidden" id="gpsLng">
           </div>
-          <textarea id="comentarios" placeholder="Comentarios adicionales"></textarea>
-          <button type="submit" class="btn-primary">Enviar Pedido</button>
+
+          <!-- PAGO -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fas fa-credit-card"></i> MÉTODO DE PAGO</div>
+            <div class="pago-options">
+              <label class="pago-option active" onclick="selectPago(this,'Efectivo')">
+                <input type="radio" name="pago" value="Efectivo" checked>
+                <i class="fas fa-money-bill-wave"></i> Efectivo
+              </label>
+              <label class="pago-option" onclick="selectPago(this,'Transferencia')">
+                <input type="radio" name="pago" value="Transferencia">
+                <i class="fas fa-university"></i> Transferencia
+              </label>
+            </div>
+          </div>
+
+          <!-- OBSERVACIONES -->
+          <div class="form-section">
+            <div class="form-section-title"><i class="fas fa-comment-dots"></i> OBSERVACIONES</div>
+            <textarea id="comentarios" placeholder="Sin cebolla, poco picante, marcar al llegar, casa color blanco..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btnSubmit">
+            <i class="fab fa-whatsapp"></i> Enviar Pedido por WhatsApp
+          </button>
         </form>
       </div>
     </div>
   </section>
-  <script>
-    let carrito=JSON.parse(localStorage.getItem("medioUrbanoCart"))||[];
 
-    /* DETECTAR MARCA DEL CARRITO */
-    function detectBrand(){
-      const brandMap={cocina:"cocina",salad:"salad",burgers:"burgers",pasta:"pasta"};
-      for(const item of carrito){
-        if(item.categoria&&brandMap[item.categoria]) return item.categoria;
+  <script>
+    let carrito = JSON.parse(localStorage.getItem("medioUrbanoCart")) || [];
+    let ubicacion = null;
+
+    /* ===== DETECTAR MARCA ===== */
+    function detectBrand() {
+      const map = {cocina:"cocina",salad:"salad",burgers:"burgers",pasta:"pasta"};
+      for (const item of carrito) {
+        if (item.categoria && map[item.categoria]) return item.categoria;
       }
       return null;
     }
 
-    /* CARGAR LOGO DE FIRESTORE */
-    function loadBrandLogo(){
-      const brand=detectBrand();
-      if(!brand||typeof firebase==="undefined"||!firebase.firestore) return;
+    /* ===== CARGAR LOGO DESDE FIRESTORE ===== */
+    function loadBrandLogo() {
+      const brand = detectBrand();
+      if (!brand || typeof firebase === "undefined" || !firebase.firestore) {
+        if (brand) {
+          document.getElementById("brandName").textContent = "MEDIO URBANO " + brand.toUpperCase();
+        }
+        return;
+      }
       firebase.firestore().collection("config").doc("logos").get()
-        .then(doc=>{
-          if(doc.exists&&doc.data()[brand]){
-            const logoEl=document.getElementById("brandLogo");
-            const nameEl=document.getElementById("brandName");
-            logoEl.src=doc.data()[brand];
-            logoEl.alt="Medio Urbano "+brand.charAt(0).toUpperCase()+brand.slice(1);
-            logoEl.style.display="block";
-            nameEl.textContent="MEDIO URBANO "+brand.toUpperCase();
-            document.querySelector(".pedido-box h1").textContent="Realiza Tu Pedido";
+        .then(doc => {
+          if (doc.exists && doc.data()[brand]) {
+            const logo = document.getElementById("brandLogo");
+            logo.src = doc.data()[brand];
+            logo.alt = "Medio Urbano " + brand.charAt(0).toUpperCase() + brand.slice(1);
+            logo.style.display = "block";
           }
-        }).catch(()=>{});
+          document.getElementById("brandName").textContent = "MEDIO URBANO " + brand.toUpperCase();
+        })
+        .catch(() => {
+          document.getElementById("brandName").textContent = "MEDIO URBANO " + brand.toUpperCase();
+        });
     }
 
-    function renderSummary(){
-      const summary=document.getElementById("pedidoSummary");
-      if(!carrito.length){summary.innerHTML="<p style='color:#666;text-align:center;'>Carrito vacío</p>";return;}
-      let html="<h3>Tu Pedido</h3>";
-      let total=0;
-      carrito.forEach(item=>{
-        const sub=item.precio*item.cantidad;
-        total+=sub;
-        html+=`<div class="item"><span>${item.nombre} x${item.cantidad}</span><span>$${sub}</span></div>`;
+    /* ===== RESUMEN ===== */
+    function renderSummary() {
+      const el = document.getElementById("pedidoSummary");
+      if (!carrito.length) {
+        el.innerHTML = '<div class="empty-msg"><i class="fas fa-cart-shopping"></i> Tu carrito está vacío</div>';
+        document.getElementById("btnSubmit").disabled = true;
+        return;
+      }
+      const brand = detectBrand();
+      const brandLabel = brand ? brand.charAt(0).toUpperCase() + brand.slice(1) : "General";
+      let html = "<h3>RESUMEN DEL PEDIDO</h3>";
+      let total = 0;
+      carrito.forEach(item => {
+        const sub = item.precio * item.cantidad;
+        total += sub;
+        html += '<div class="item">';
+        html += '<span class="item-name">' + item.nombre + '</span>';
+        html += '<span class="item-qty">x' + item.cantidad + '</span>';
+        html += '<span class="item-price">$' + sub.toFixed(2) + '</span>';
+        html += '</div>';
+        if (item.extras && item.extras.length) {
+          html += '<div class="item-extra"><i class="fas fa-plus-circle"></i> ' + item.extras.join(", ") + '</div>';
+        }
       });
-      html+=`<div class="total">Total: $${total.toFixed(2)}</div>`;
-      summary.innerHTML=html;
+      html += '<div class="envio"><span>Envío</span><span style="color:var(--primary);">A convenir</span></div>';
+      html += '<div class="total-line"><span>TOTAL</span><span>$' + total.toFixed(2) + ' MXN</span></div>';
+      el.innerHTML = html;
     }
 
-    function calcularTotalPedido(lista){
-      return lista.reduce((sum,item)=>sum+item.precio*item.cantidad,0);
+    /* ===== PAGO ===== */
+    function selectPago(el, value) {
+      document.querySelectorAll(".pago-option").forEach(o => o.classList.remove("active"));
+      el.classList.add("active");
+      el.querySelector("input").checked = true;
     }
 
-    document.getElementById("pedidoForm").addEventListener("submit",(e)=>{
+    /* ===== GPS ===== */
+    function compartirUbicacion() {
+      const btn = document.getElementById("gpsBtn");
+      if (ubicacion) {
+        ubicacion = null;
+        document.getElementById("gpsLat").value = "";
+        document.getElementById("gpsLng").value = "";
+        btn.classList.remove("active");
+        btn.querySelector("span").textContent = "Compartir mi ubicación (opcional)";
+        return;
+      }
+      if (!navigator.geolocation) {
+        alert("Tu navegador no soporta geolocalización.");
+        return;
+      }
+      btn.querySelector("span").textContent = "Obteniendo ubicación...";
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          ubicacion = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          document.getElementById("gpsLat").value = ubicacion.lat;
+          document.getElementById("gpsLng").value = ubicacion.lng;
+          btn.classList.add("active");
+          btn.querySelector("span").textContent = "Ubicación capturada ✓ Toca para quitar";
+        },
+        () => {
+          btn.querySelector("span").textContent = "No se pudo obtener ubicación";
+          setTimeout(() => {
+            btn.querySelector("span").textContent = "Compartir mi ubicación (opcional)";
+          }, 2000);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    /* ===== ENVIAR ===== */
+    document.getElementById("pedidoForm").addEventListener("submit", e => {
       e.preventDefault();
-      const brand=detectBrand()||"general";
-      const brandName=brand.charAt(0).toUpperCase()+brand.slice(1);
-      const cliente=document.getElementById("cliente").value;
-      const telefono=document.getElementById("telefono").value;
-      const direccion=document.getElementById("direccion").value;
-      const comentarios=document.getElementById("comentarios").value;
-      const pago=document.getElementById("pago").value;
-      const extras=Array.from(document.querySelectorAll('input[name="extra"]:checked')).map(cb=>cb.value);
+      if (!carrito.length) return;
 
-      const numero="529983852946";
-      let mensaje="%F0%9F%8D%B4 *PEDIDO - MEDIO URBANO "+brandName.toUpperCase()+"*%0A%0A";
-      mensaje+="*Cliente:* "+cliente+"%0A";
-      mensaje+="*Tel:* "+telefono+"%0A";
-      mensaje+="*Dirección:* "+direccion+"%0A%0A";
-      carrito.forEach(item=>{mensaje+="%E2%80%A2 "+item.nombre+" x"+item.cantidad+" - $"+(item.precio*item.cantidad)+"%0A";});
-      mensaje+="%0A%F0%9F%92%B0 *Total: $"+calcularTotalPedido(carrito).toFixed(2)+"*";
-      mensaje+="%0A%0A%F0%9F%92%B3 *Pago:* "+pago;
-      if(extras.length) mensaje+="%0A%F0%9F%A5%A9 *Extras:* "+extras.join(", ");
-      if(comentarios) mensaje+="%0A%0A%F0%9F%93%8D "+comentarios;
+      const brand = detectBrand() || "general";
+      const brandLabel = brand.charAt(0).toUpperCase() + brand.slice(1);
+      const cliente = document.getElementById("cliente").value.trim();
+      const telefono = document.getElementById("telefono").value.trim();
+      const direccion = document.getElementById("direccion").value.trim();
+      const colonia = document.getElementById("colonia").value.trim();
+      const cp = document.getElementById("cp").value.trim();
+      const referencias = document.getElementById("referencias").value.trim();
+      const comentarios = document.getElementById("comentarios").value.trim();
+      const pago = document.querySelector('input[name="pago"]:checked').value;
+
+      if (!cliente || !telefono || !direccion || !colonia) {
+        alert("Por favor completa todos los campos obligatorios.");
+        return;
+      }
+
+      const numero = "529983852946";
+
+      let msg = "🍔 *PEDIDO - MEDIO URBANO " + brandLabel.toUpperCase() + "*\n\n";
+      msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg += "👤 *Cliente*\n" + cliente + "\n\n";
+      msg += "📱 *WhatsApp*\n" + telefono + "\n\n";
+      msg += "🏠 *Dirección*\n" + direccion + "\n";
+      if (colonia) msg += "Colonia " + colonia + "\n";
+      if (cp) msg += "CP " + cp + "\n";
+      if (referencias) msg += "Referencias: " + referencias + "\n";
+      msg += "\n";
+
+      if (ubicacion) {
+        msg += "📍 *Ubicación*\nhttps://maps.google.com/?q=" + ubicacion.lat + "," + ubicacion.lng + "\n\n";
+      }
+
+      msg += "💳 *Método de pago*\n" + pago + "\n\n";
+      msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg += "🛒 *PEDIDO*\n\n";
+
+      carrito.forEach(item => {
+        msg += item.cantidad + "x " + item.nombre + " - $" + (item.precio * item.cantidad).toFixed(2) + "\n";
+        if (item.extras && item.extras.length) {
+          msg += "  Extra: " + item.extras.join(", ") + "\n";
+        }
+      });
+
+      let total = carrito.reduce((sum, item) => sum + item.precio * item.cantidad, 0);
+      msg += "\n━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      msg += "💲 *TOTAL: $" + total.toFixed(2) + " MXN*\n\n";
+      msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n";
+
+      if (comentarios) {
+        msg += "📝 *Observaciones*\n" + comentarios + "\n\n";
+        msg += "━━━━━━━━━━━━━━━━━━━━━━\n\n";
+      }
+
+      msg += "Gracias por elegir Medio Urbano. 🙏";
 
       /* GUARDAR EN FIRESTORE */
-      if(typeof firebase!=="undefined"&&firebase.firestore){
+      if (typeof firebase !== "undefined" && firebase.firestore) {
         firebase.firestore().collection("pedidos").add({
-          cliente,telefono,direccion,comentarios,
-          productos:carrito,
-          extras,pago,
-          total:calcularTotalPedido(carrito),
-          marca:brand,
-          estado:"Pendiente",
-          fecha:new Date().toISOString()
-        }).catch(()=>{});
+          cliente, telefono, direccion, colonia, cp, referencias,
+          productos: carrito, pago, comentarios,
+          total: total,
+          marca: brand,
+          gpsLat: ubicacion ? ubicacion.lat : null,
+          gpsLng: ubicacion ? ubicacion.lng : null,
+          estado: "Pendiente",
+          fecha: new Date().toISOString()
+        }).catch(() => {});
       }
 
       localStorage.removeItem("medioUrbanoCart");
-      window.open("https://wa.me/"+numero+"?text="+mensaje,"_blank");
-      setTimeout(()=>{window.location="test.html";},1500);
+      window.open("https://wa.me/" + numero + "?text=" + encodeURIComponent(msg), "_blank");
+      setTimeout(() => { window.location = "test.html"; }, 1500);
     });
 
     renderSummary();
