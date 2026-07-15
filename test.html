@@ -1520,6 +1520,32 @@
   <script src="js/pedidos.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/promos-carousel.js"></script>
+  <script src="js/brand-identity.js"></script>
+  <script>
+    function loadBrandLogosFromFirestore(){
+      if(typeof firebase==="undefined"||!firebase.firestore) return;
+      firebase.firestore().collection("config").doc("logos").get()
+        .then(doc=>{
+          if(!doc.exists) return;
+          const logos=doc.data();
+          const mapping={
+            marca:[".hero-logo","header .logo img",".footer-brand img"],
+            cocina:[".brand[data-categoria='cocina'] img"],
+            salad:[".brand[data-categoria='salad'] img"],
+            burgers:[".brand[data-categoria='burgers'] img"],
+            pasta:[".brand[data-categoria='pasta'] img"]
+          };
+          Object.keys(mapping).forEach(key=>{
+            if(logos[key]){
+              mapping[key].forEach(sel=>{
+                document.querySelectorAll(sel).forEach(img=>{img.src=logos[key];});
+              });
+            }
+          });
+        }).catch(()=>{});
+    }
+    setTimeout(loadBrandLogosFromFirestore,1500);
+  </script>
   <script>
     if("serviceWorker" in navigator){
       window.addEventListener("load",()=>{

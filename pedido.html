@@ -8,6 +8,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"/>
   <link rel="stylesheet" href="css/variables.css">
   <link rel="stylesheet" href="css/themes.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <style>
     *{margin:0;padding:0;box-sizing:border-box;}
     body{font-family:var(--font-body);background:var(--dark);color:#fff;min-height:100vh;}
@@ -20,10 +23,19 @@
       border-radius:25px;padding:50px 40px;
       box-shadow:0 25px 50px rgba(0,0,0,.45);
       border:1px solid rgba(255,255,255,.06);
+      text-align:center;
+    }
+    .pedido-brand-logo{
+      width:180px;height:auto;max-height:100px;
+      object-fit:contain;margin:0 auto 10px;display:block;
+    }
+    .pedido-brand-name{
+      font-family:var(--font-title);font-size:14px;
+      letter-spacing:3px;color:var(--primary);margin-bottom:5px;
     }
     .pedido-box h1{
       font-family:var(--font-title);font-size:48px;
-      color:var(--primary);margin-bottom:10px;text-align:center;
+      color:var(--primary);margin-bottom:10px;
     }
     .pedido-box>p{text-align:center;color:#aaa;margin-bottom:35px;}
     .pedido-box input,.pedido-box textarea{
@@ -35,8 +47,7 @@
     .pedido-box input:focus,.pedido-box textarea:focus{border-color:var(--primary);}
     .pedido-box textarea{resize:vertical;min-height:100px;}
     .pedido-box button{
-      width:100%;padding:18px;margin-top:10px;
-      font-size:16px;
+      width:100%;padding:18px;margin-top:10px;font-size:16px;
     }
     .pedido-box .btn-primary{
       width:100%;padding:18px;border:none;border-radius:50px;
@@ -45,10 +56,27 @@
       font-family:var(--font-body);
     }
     .pedido-box .btn-primary:hover{background:#ffe46d;transform:translateY(-4px);}
-    .pedido-summary{margin-bottom:30px;}
+    .pedido-summary{margin-bottom:30px;text-align:left;}
     .pedido-summary h3{font-family:var(--font-title);font-size:24px;color:var(--primary);margin-bottom:15px;}
     .pedido-summary .item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
     .pedido-summary .total{text-align:right;font-size:20px;font-weight:700;color:var(--primary);margin-top:15px;}
+    .metodo-pago{margin-bottom:15px;text-align:left;}
+    .metodo-pago label{display:block;color:#aaa;font-size:13px;margin-bottom:8px;}
+    .metodo-pago select{width:100%;padding:14px;background:#1f1f1f;border:1px solid rgba(255,255,255,.08);border-radius:14px;color:white;font-size:15px;font-family:var(--font-body);outline:none;}
+    .extras-group{text-align:left;margin-bottom:15px;}
+    .extras-group label{display:block;color:#aaa;font-size:13px;margin-bottom:8px;}
+    .extras-group .extras-list{display:flex;flex-wrap:wrap;gap:8px;}
+    .extras-group .extras-list label{
+      display:flex;align-items:center;gap:6px;
+      padding:8px 14px;background:#1f1f1f;border-radius:10px;
+      cursor:pointer;font-size:13px;color:#ccc;
+      border:1px solid rgba(255,255,255,.06);transition:.2s;
+    }
+    .extras-group .extras-list label:has(input:checked){
+      border-color:var(--primary);color:var(--primary);
+      background:rgba(255,208,40,.08);
+    }
+    .extras-group .extras-list input[type="checkbox"]{accent-color:var(--primary);}
   </style>
 </head>
 <body>
@@ -60,13 +88,34 @@
   <section class="pedido-page">
     <div class="container">
       <div class="pedido-box">
-        <h1>Finalizar Pedido</h1>
+        <img id="brandLogo" class="pedido-brand-logo" src="" alt="" style="display:none;">
+        <div id="brandName" class="pedido-brand-name"></div>
+        <h1>Realiza Tu Pedido</h1>
         <p>Completa tus datos para enviar tu pedido.</p>
         <div class="pedido-summary" id="pedidoSummary"></div>
         <form id="pedidoForm">
           <input type="text" id="cliente" placeholder="Nombre completo" required>
           <input type="tel" id="telefono" placeholder="Teléfono" required>
           <input type="text" id="direccion" placeholder="Dirección" required>
+          <div class="extras-group">
+            <label>Extras</label>
+            <div class="extras-list">
+              <label><input type="checkbox" name="extra" value="Tocino"> Tocino</label>
+              <label><input type="checkbox" name="extra" value="Queso"> Queso</label>
+              <label><input type="checkbox" name="extra" value="Jalapeños"> Jalapeños</label>
+              <label><input type="checkbox" name="extra" value="Guacamole"> Guacamole</label>
+              <label><input type="checkbox" name="extra" value="Papas"> Papas</label>
+              <label><input type="checkbox" name="extra" value="Ensalada"> Ensalada</label>
+            </div>
+          </div>
+          <div class="metodo-pago">
+            <label>Método de pago</label>
+            <select id="pago">
+              <option value="Efectivo">Efectivo</option>
+              <option value="Transferencia">Transferencia</option>
+              <option value="Tarjeta">Tarjeta</option>
+            </select>
+          </div>
           <textarea id="comentarios" placeholder="Comentarios adicionales"></textarea>
           <button type="submit" class="btn-primary">Enviar Pedido</button>
         </form>
@@ -75,6 +124,33 @@
   </section>
   <script>
     let carrito=JSON.parse(localStorage.getItem("medioUrbanoCart"))||[];
+
+    /* DETECTAR MARCA DEL CARRITO */
+    function detectBrand(){
+      const brandMap={cocina:"cocina",salad:"salad",burgers:"burgers",pasta:"pasta"};
+      for(const item of carrito){
+        if(item.categoria&&brandMap[item.categoria]) return item.categoria;
+      }
+      return null;
+    }
+
+    /* CARGAR LOGO DE FIRESTORE */
+    function loadBrandLogo(){
+      const brand=detectBrand();
+      if(!brand||typeof firebase==="undefined"||!firebase.firestore) return;
+      firebase.firestore().collection("config").doc("logos").get()
+        .then(doc=>{
+          if(doc.exists&&doc.data()[brand]){
+            const logoEl=document.getElementById("brandLogo");
+            const nameEl=document.getElementById("brandName");
+            logoEl.src=doc.data()[brand];
+            logoEl.alt="Medio Urbano "+brand.charAt(0).toUpperCase()+brand.slice(1);
+            logoEl.style.display="block";
+            nameEl.textContent="MEDIO URBANO "+brand.toUpperCase();
+            document.querySelector(".pedido-box h1").textContent="Realiza Tu Pedido";
+          }
+        }).catch(()=>{});
+    }
 
     function renderSummary(){
       const summary=document.getElementById("pedidoSummary");
@@ -94,35 +170,48 @@
       return lista.reduce((sum,item)=>sum+item.precio*item.cantidad,0);
     }
 
-    function crearPedidoLocal(cliente,telefono,direccion,carrito){
-      const pedido={id:Date.now(),cliente,telefono,direccion,productos:carrito,total:calcularTotalPedido(carrito),estado:"Pendiente",fecha:new Date().toLocaleString()};
-      let pedidos=JSON.parse(localStorage.getItem("pedidos"))||[];
-      pedidos.push(pedido);
-      localStorage.setItem("pedidos",JSON.stringify(pedidos));
-      return pedido;
-    }
-
     document.getElementById("pedidoForm").addEventListener("submit",(e)=>{
       e.preventDefault();
-      const pedido=crearPedidoLocal(
-        document.getElementById("cliente").value,
-        document.getElementById("telefono").value,
-        document.getElementById("direccion").value,
-        carrito
-      );
+      const brand=detectBrand()||"general";
+      const brandName=brand.charAt(0).toUpperCase()+brand.slice(1);
+      const cliente=document.getElementById("cliente").value;
+      const telefono=document.getElementById("telefono").value;
+      const direccion=document.getElementById("direccion").value;
+      const comentarios=document.getElementById("comentarios").value;
+      const pago=document.getElementById("pago").value;
+      const extras=Array.from(document.querySelectorAll('input[name="extra"]:checked')).map(cb=>cb.value);
+
       const numero="529983852946";
-      let mensaje="\ud83c\udf54 *PEDIDO MEDIO URBANO*%0A%0A";
-      carrito.forEach(item=>{mensaje+=`\u2022 ${item.nombre} x${item.cantidad} - $${item.precio*item.cantidad}%0A`;});
-      mensaje+="%0A\ud83d\udcb0 Total: $"+calcularTotalPedido(carrito).toFixed(2);
-      if(document.getElementById("comentarios").value){
-        mensaje+="%0A%0A\ud83d\udcdd "+document.getElementById("comentarios").value;
+      let mensaje="%F0%9F%8D%B4 *PEDIDO - MEDIO URBANO "+brandName.toUpperCase()+"*%0A%0A";
+      mensaje+="*Cliente:* "+cliente+"%0A";
+      mensaje+="*Tel:* "+telefono+"%0A";
+      mensaje+="*Dirección:* "+direccion+"%0A%0A";
+      carrito.forEach(item=>{mensaje+="%E2%80%A2 "+item.nombre+" x"+item.cantidad+" - $"+(item.precio*item.cantidad)+"%0A";});
+      mensaje+="%0A%F0%9F%92%B0 *Total: $"+calcularTotalPedido(carrito).toFixed(2)+"*";
+      mensaje+="%0A%0A%F0%9F%92%B3 *Pago:* "+pago;
+      if(extras.length) mensaje+="%0A%F0%9F%A5%A9 *Extras:* "+extras.join(", ");
+      if(comentarios) mensaje+="%0A%0A%F0%9F%93%8D "+comentarios;
+
+      /* GUARDAR EN FIRESTORE */
+      if(typeof firebase!=="undefined"&&firebase.firestore){
+        firebase.firestore().collection("pedidos").add({
+          cliente,telefono,direccion,comentarios,
+          productos:carrito,
+          extras,pago,
+          total:calcularTotalPedido(carrito),
+          marca:brand,
+          estado:"Pendiente",
+          fecha:new Date().toISOString()
+        }).catch(()=>{});
       }
+
       localStorage.removeItem("medioUrbanoCart");
-      window.open(`https://wa.me/${numero}?text=${mensaje}`,"_blank");
+      window.open("https://wa.me/"+numero+"?text="+mensaje,"_blank");
       setTimeout(()=>{window.location="test.html";},1500);
     });
 
     renderSummary();
+    loadBrandLogo();
   </script>
 </body>
 </html>

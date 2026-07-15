@@ -19,6 +19,7 @@
       <li onclick="showSection('promociones')" data-section="promociones"><i class="fas fa-tag"></i> Promociones</li>
       <li onclick="showSection('pedidos')" data-section="pedidos"><i class="fas fa-receipt"></i> Pedidos</li>
       <li onclick="showSection('config')" data-section="config"><i class="fas fa-cog"></i> Configuración</li>
+      <li onclick="showSection('marcas')" data-section="marcas"><i class="fas fa-palette"></i> Identidad de Marca</li>
       <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</li>
     </ul>
   </aside>
@@ -155,6 +156,15 @@
       </section>
     </div>
 
+    <!-- IDENTIDAD DE MARCA -->
+    <div id="sec-marcas" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Identidad de Marca</h2>
+        <p style="color:#aaa;margin-bottom:25px;">Sube los logos de cada marca. Se mostrarán automáticamente en el formulario de pedidos y en el sitio.</p>
+        <div id="brandLogosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;"></div>
+      </section>
+    </div>
+
     <!-- CONFIGURACION -->
     <div id="sec-config" class="dashboard-section" style="display:none;">
       <section>
@@ -173,6 +183,7 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/admin-v3.js"></script>
   <script src="js/admin-promos.js"></script>
+  <script src="js/brand-identity.js"></script>
   <script src="js/dashboard.js"></script>
   <script>
     // NAV
@@ -204,6 +215,7 @@
 
     updateStats();
     initAdminPromos();
+    initBrandIdentity();
   </script>
   <style>
     aside li.active{background:var(--primary);color:#111;font-weight:700;}
