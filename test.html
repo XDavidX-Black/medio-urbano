@@ -1424,75 +1424,67 @@
     // menu.js - MEDIO URBANO V3
     //====================================================
 
-    const categoriasBase={
-      cocina:{
-        nombre:"COCINA",
-        color:"#5B8C2A",
-        productos:[
-          {id:1,nombre:"Menú del Día",descripcion:"Platillo casero preparado diariamente.",precio:0,imagen:"img/cocina/menu-dia.webp",categoria:"cocina",extras:[],estado:1,destacado:false},
-          {id:2,nombre:"Pollo Asado",descripcion:"Acompañado de arroz y verduras.",precio:0,imagen:"img/cocina/pollo.webp",categoria:"cocina",extras:[],estado:1,destacado:false},
-          {id:3,nombre:"Milanesa de Pollo",descripcion:"Con puré y ensalada.",precio:0,imagen:"img/cocina/milanesa.webp",categoria:"cocina",extras:[],estado:1,destacado:false}
-        ]
-      },
-      salad:{
-        nombre:"SALAD",
-        color:"#3DBB68",
-        productos:[
-          {id:101,nombre:"Salad Clásica",descripcion:"Base + proteína + toppings.",precio:0,imagen:"img/salad/clasica.webp",categoria:"salad",extras:[],estado:1,destacado:false},
-          {id:102,nombre:"Salad Premium",descripcion:"Ingredientes frescos del día.",precio:0,imagen:"img/salad/premium.webp",categoria:"salad",extras:[],estado:1,destacado:false}
-        ]
-      },
-      burgers:{nombre:"BURGERS",proximamente:true,productos:[]},
-      pasta:{nombre:"PASTA",proximamente:true,productos:[]}
+    const categoriasMeta={
+      cocina:{nombre:"COCINA",color:"#5B8C2A"},
+      salad:{nombre:"SALAD",color:"#3DBB68"},
+      burgers:{nombre:"BURGERS",proximamente:true,color:"#ff6b35"},
+      pasta:{nombre:"PASTA",proximamente:true,color:"#f39c12"}
     };
 
-    let categorias=JSON.parse(JSON.stringify(categoriasBase));
+    let categorias={};
+    Object.keys(categoriasMeta).forEach(k=>categorias[k]={...categoriasMeta[k],productos:[]});
 
-    function seedBaseProducts(){
-      const existing=JSON.parse(localStorage.getItem("productos"))||[];
-      if(existing.length>0) return;
-      const seed=[];
-      Object.entries(categoriasBase).forEach(([cat,data])=>{
-        (data.productos||[]).forEach(bp=>{
-          seed.push({id:bp.id,nombre:bp.nombre,precio:bp.precio,descripcion:bp.descripcion||"",categoria:cat,imagen:bp.imagen||"",extras:[],estado:1,destacado:false,orden:0});
+    const BASE_PRODUCTS=[
+      {id:"1",nombre:"Menú del Día",descripcion:"Platillo casero preparado diariamente.",precio:0,imagen:"img/cocina/menu-dia.webp",categoria:"cocina"},
+      {id:"2",nombre:"Pollo Asado",descripcion:"Acompañado de arroz y verduras.",precio:0,imagen:"img/cocina/pollo.webp",categoria:"cocina"},
+      {id:"3",nombre:"Milanesa de Pollo",descripcion:"Con puré y ensalada.",precio:0,imagen:"img/cocina/milanesa.webp",categoria:"cocina"},
+      {id:"101",nombre:"Salad Clásica",descripcion:"Base + proteína + toppings.",precio:0,imagen:"img/salad/clasica.webp",categoria:"salad"},
+      {id:"102",nombre:"Salad Premium",descripcion:"Ingredientes frescos del día.",precio:0,imagen:"img/salad/premium.webp",categoria:"salad"}
+    ];
+
+    async function seedProductosToFirestore(){
+      if(typeof firebase==="undefined"||!firebase.firestore) return;
+      try{
+        const snap=await firebase.firestore().collection("productos").limit(1).get();
+        if(!snap.empty) return;
+        const batch=firebase.firestore().batch();
+        BASE_PRODUCTS.forEach(p=>{
+          const ref=firebase.firestore().collection("productos").doc(p.id);
+          batch.set(ref,{...p,extras:[],estado:1,destacado:false,orden:0,createdAt:new Date().toISOString()});
         });
-      });
-      if(seed.length) localStorage.setItem("productos",JSON.stringify(seed));
+        await batch.commit();
+      }catch(e){console.warn("Seed error:",e);}
     }
-    seedBaseProducts();
 
-    function cargarProductosAdmin(){
-      const adminProd=JSON.parse(localStorage.getItem("productos"))||[];
-      Object.keys(categoriasBase).forEach(cat=>{
-        categorias[cat]={...categoriasBase[cat],productos:[]};
-      });
-      adminProd.forEach(p=>{
-        if(categorias[p.categoria]){
-          if(!categorias[p.categoria].productos) categorias[p.categoria].productos=[];
-          categorias[p.categoria].productos.push({
-            id:p.id,
-            nombre:p.nombre,
-            descripcion:p.descripcion,
-            precio:Number(p.precio)||0,
-            imagen:p.imagen,
-            categoria:p.categoria,
-            extras:p.extras||[],
-            estado:p.estado!==undefined?p.estado:1,
-            destacado:p.destacado||false
+    function initProductosRealtime(){
+      if(typeof firebase==="undefined"||!firebase.firestore){
+        console.warn("Firebase no disponible para productos");
+        return;
+      }
+      seedProductosToFirestore().then(()=>{
+        firebase.firestore().collection("productos").orderBy("orden","asc").onSnapshot(snap=>{
+          Object.keys(categorias).forEach(k=>categorias[k].productos=[]);
+          snap.forEach(doc=>{
+            const p={id:doc.id,...doc.data()};
+            if(categorias[p.categoria]){
+              categorias[p.categoria].productos.push(p);
+            }
           });
-        }
-      });
-      Object.keys(categorias).forEach(cat=>{
-        if(categorias[cat].proximamente && categorias[cat].productos.length===0){
-          categorias[cat].productos=[];
-        }
+          const mc=document.querySelector("#menuCompleto");
+          if(mc){
+            const theme=[...document.body.classList].find(c=>c.startsWith("theme-")&&c!=="theme-default");
+            if(theme){
+              const catName=theme.replace("theme-","");
+              if(categorias[catName]) mostrarMenu(categorias[catName]);
+            }
+          }
+        },err=>console.error("Productos snapshot error:",err));
       });
     }
 
-    cargarProductosAdmin();
+    initProductosRealtime();
 
     function abrirCategoria(nombre){
-      cargarProductosAdmin();
       const cat=categorias[nombre];
       if(cat.proximamente){
         if(!cat.productos||cat.productos.length===0){
@@ -1566,11 +1558,10 @@
     }
 
     function agregarProducto(id){
-      cargarProductosAdmin();
       Object.keys(categorias).forEach(c=>{
         if(categorias[c].productos){
           categorias[c].productos.forEach(p=>{
-            if(p.id===id){
+            if(p.id===id||p.id===String(id)||String(p.id)===String(id)){
               if(p.estado===0) return;
               agregarCarrito(p);
             }
@@ -1578,20 +1569,6 @@
         }
       });
     }
-
-    window.addEventListener("storage",e=>{
-      if(e.key==="productos"){
-        cargarProductosAdmin();
-        const mc=document.querySelector("#menuCompleto");
-        if(mc){
-          const theme=[...document.body.classList].find(c=>c.startsWith("theme-")&&c!=="theme-default");
-          if(theme){
-            const catName=theme.replace("theme-","");
-            if(categorias[catName]) mostrarMenu(categorias[catName]);
-          }
-        }
-      }
-    });
 
     document.querySelectorAll(".brand").forEach(card=>{
       card.addEventListener("click",()=>{

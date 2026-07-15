@@ -58,10 +58,15 @@ function getLogoForBrand(brand){
 }
 
 function actualizarCards(){
-  const map={statProductos:()=>document.getElementById("statProductos")&&(document.getElementById("statProductos").textContent=JSON.parse(localStorage.getItem("productos")||"[]").length),statPromos:()=>{},statPedidos:()=>setTxt("statPedidos",dashboard.pedidosHoy),statPendientes:()=>setTxt("statPendientes",dashboard.pendientes),statPreparando:()=>setTxt("statPreparando",dashboard.preparando),statReparto:()=>setTxt("statReparto",dashboard.reparto),statEntregados:()=>setTxt("statEntregados",dashboard.entregados),statIngresos:()=>setTxt("statIngresos","$"+dashboard.ingresosHoy.toFixed(0)),statIngresosSem:()=>setTxt("statIngresosSem","$"+dashboard.ingresosSem.toFixed(0)),statIngresosMes:()=>setTxt("statIngresosMes","$"+dashboard.ingresosMes.toFixed(0)),statClientes:()=>setTxt("statClientes","-"),statMasVendido:()=>setTxt("statMasVendido",dashboard.masVendido),statMarcaTop:()=>setTxt("statMarcaTop",dashboard.marcaTop)};
+  const map={statProductos:()=>{},statPromos:()=>{},statPedidos:()=>setTxt("statPedidos",dashboard.pedidosHoy),statPendientes:()=>setTxt("statPendientes",dashboard.pendientes),statPreparando:()=>setTxt("statPreparando",dashboard.preparando),statReparto:()=>setTxt("statReparto",dashboard.reparto),statEntregados:()=>setTxt("statEntregados",dashboard.entregados),statIngresos:()=>setTxt("statIngresos","$"+dashboard.ingresosHoy.toFixed(0)),statIngresosSem:()=>setTxt("statIngresosSem","$"+dashboard.ingresosSem.toFixed(0)),statIngresosMes:()=>setTxt("statIngresosMes","$"+dashboard.ingresosMes.toFixed(0)),statClientes:()=>setTxt("statClientes","-"),statMasVendido:()=>setTxt("statMasVendido",dashboard.masVendido),statMarcaTop:()=>setTxt("statMarcaTop",dashboard.marcaTop)};
   Object.values(map).forEach(fn=>fn());
-  // Clientes count
   if(typeof firebase!=="undefined"&&firebase.firestore){
+    firebase.firestore().collection("productos").get().then(snap=>{
+      setTxt("statProductos",snap.size);
+    }).catch(()=>{});
+    firebase.firestore().collection("promociones").get().then(snap=>{
+      setTxt("statPromos",snap.size);
+    }).catch(()=>{});
     firebase.firestore().collection("pedidos").get().then(snap=>{
       const phones=new Set();
       snap.forEach(d=>{const t=(d.data().telefono||"").trim();if(t)phones.add(t);});

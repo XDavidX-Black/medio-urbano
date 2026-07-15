@@ -1,12 +1,10 @@
 /*====================================================
 slider.js - MEDIO URBANO V3 - Hero por Horario
-Horarios reales:
-  Cocina/Salad: Lun-Vie 10:00-15:00
-  Burgers/Pasta: Lun-Sab 20:00-00:00 (Próximamente)
-  Fuera de horario: Marca general
+Horarios desde Firestore config/horarios
+Fallback: horarios hardcoded si Firestore no disponible
 =====================================================*/
 
-const heroConfig = {
+const heroConfigDefault = {
   marca: {
     logo: "img/logo-marca.png",
     title: "MEDIO URBANO",
@@ -27,23 +25,52 @@ const heroConfig = {
   }
 };
 
+let heroFirestoreConfig={};
+let horariosFirestore={};
+
 function getHeroBySchedule() {
   const now = new Date();
   const h = now.getHours();
-  const day = now.getDay(); // 0=Dom, 1=Lun...6=Sab
+  const day = now.getDay();
+  const dayIdx=day===0?6:day-1;
 
-  // Cocina + Salad: Lun-Vie (1-5), 10:00-15:00
-  if (day >= 1 && day <= 5 && h >= 10 && h < 15) {
-    return heroConfig.cocina;
+  const getHora=(marca)=>{
+    const key=marca+"_"+dayIdx;
+    if(horariosFirestore[key]){
+      const hd=horariosFirestore[key];
+      if(hd.activo===false) return null;
+      const[ah,am]=(hd.apertura||"10:00").split(":").map(Number);
+      const[ch,cm]=(hd.cierre||"22:00").split(":").map(Number);
+      const min=ah*60+am,max=ch*60+cm,cur=h*60+now.getMinutes();
+      if(max>min) return cur>=min&&cur<max;
+      return cur>=min||cur<max;
+    }
+    return null;
+  };
+
+  const cocinaOpen=getHora("cocina");
+  const saladOpen=getHora("salad");
+  if((cocinaOpen===true||saladOpen===true)){
+    return heroFirestoreConfig.cocina||heroConfigDefault.cocina;
   }
 
-  // Burgers + Pasta: Lun-Sab (1-6), 20:00-00:00
-  if (day >= 1 && day <= 6 && (h >= 20 || h < 0)) {
-    return heroConfig.burgers;
+  const burgersOpen=getHora("burgers");
+  const pastaOpen=getHora("pasta");
+  if(burgersOpen===true||pastaOpen===true){
+    return heroFirestoreConfig.burgers||heroConfigDefault.burgers;
   }
 
-  // Fuera de horario: marca general
-  return heroConfig.marca;
+  if(cocinaOpen===false&&saladOpen===false&&burgersOpen===false&&pastaOpen===false){
+    return heroFirestoreConfig.marca||heroConfigDefault.marca;
+  }
+
+  if(day>=1&&day<=5&&h>=10&&h<15){
+    return heroFirestoreConfig.cocina||heroConfigDefault.cocina;
+  }
+  if(day>=1&&day<=6&&(h>=20||h<0)){
+    return heroFirestoreConfig.burgers||heroConfigDefault.burgers;
+  }
+  return heroFirestoreConfig.marca||heroConfigDefault.marca;
 }
 
 function applyHeroConfig(config) {
@@ -66,10 +93,29 @@ function animateHeroIn() {
   });
 }
 
+function loadHeroFromFirestore(){
+  if(typeof firebase==="undefined"||!firebase.firestore){
+    initHero();
+    return;
+  }
+  Promise.all([
+    firebase.firestore().collection("config").doc("hero").get(),
+    firebase.firestore().collection("config").doc("horarios").get()
+  ]).then(([heroDoc,horariosDoc])=>{
+    if(heroDoc.exists){
+      const h=heroDoc.data();
+      if(h.titulo) heroFirestoreConfig.cocina={...heroConfigDefault.cocina,title:h.titulo,subtitle:h.subtitulo||heroConfigDefault.cocina.subtitle,text:h.texto||heroConfigDefault.cocina.text};
+      if(h.btnTexto) heroFirestoreConfig.cocina.button=h.btnTexto;
+    }
+    if(horariosDoc.exists) horariosFirestore=horariosDoc.data();
+    initHero();
+  }).catch(()=>initHero());
+}
+
 function initHero() {
   const config = getHeroBySchedule();
   applyHeroConfig(config);
   animateHeroIn();
 }
 
-window.addEventListener("load", initHero);
+window.addEventListener("load", loadHeroFromFirestore);

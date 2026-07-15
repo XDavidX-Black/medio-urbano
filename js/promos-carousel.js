@@ -153,26 +153,24 @@ carrusel dentro de la sección existente #promociones
       console.warn("Firebase no disponible para carrusel");
       return;
     }
-    firebase.firestore().collection("promociones").get()
-      .then(snap=>{
-        const slides=[];
-        snap.forEach(doc=>{
-          const d=doc.data();
-          if(d.activo===false) return;
-          slides.push({
-            id:doc.id,titulo:d.titulo||"",
-            descripcion:d.descripcion||"",precio:d.precio||"",
-            imagen:d.imagen||"",marca:d.marca||"MEDIO URBANO",
-            boton:d.boton||"Ver Menú",url:d.url||"#",
-            orden:d.orden||0
-          });
+    firebase.firestore().collection("promociones").orderBy("orden","asc").onSnapshot(snap=>{
+      const slides=[];
+      snap.forEach(doc=>{
+        const d=doc.data();
+        if(d.activo===false) return;
+        slides.push({
+          id:doc.id,titulo:d.titulo||"",
+          descripcion:d.descripcion||"",precio:d.precio||"",
+          imagen:d.imagen||"",marca:d.marca||"MEDIO URBANO",
+          boton:d.boton||"Ver Menú",url:d.url||"#",
+          orden:d.orden||0,
+          accion:d.accion||"carrito"
         });
-        slides.sort((a,b)=>a.orden-b.orden);
-        render(slides);
-      })
-      .catch(err=>{
-        console.warn("Error loading promos:",err);
       });
+      render(slides);
+    },err=>{
+      console.warn("Error promos snapshot:",err);
+    });
   }
 
   document.addEventListener("DOMContentLoaded",()=>{

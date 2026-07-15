@@ -32,13 +32,12 @@ function initPanelManager(){
    ==================================================== */
 function loadPedidosPanel(){
   if(typeof firebase==="undefined"||!firebase.firestore) return;
-  firebase.firestore().collection("pedidos").orderBy("fecha","desc").get()
-    .then(snap=>{
-      allPedidos=[];
-      snap.forEach(doc=>allPedidos.push({id:doc.id,...doc.data()}));
-      renderPedidosPanel();
-      renderPedidosFull();
-    }).catch(()=>{});
+  firebase.firestore().collection("pedidos").orderBy("fecha","desc").onSnapshot(snap=>{
+    allPedidos=[];
+    snap.forEach(doc=>allPedidos.push({id:doc.id,...doc.data()}));
+    renderPedidosPanel();
+    renderPedidosFull();
+  },err=>console.error("Pedidos snapshot error:",err));
 }
 
 function renderPedidosPanel(){
@@ -534,22 +533,32 @@ function downloadFile(content,filename,type){
 function exportarRespaldo(){
   const status=document.getElementById("backupStatus");
   status.textContent="Exportando...";
-  const data={productos:JSON.parse(localStorage.getItem("productos")||"[]"),exportDate:new Date().toISOString(),version:"3.0"};
+  const data={exportDate:new Date().toISOString(),version:"3.1"};
   if(typeof firebase!=="undefined"&&firebase.firestore){
     Promise.all([
+      firebase.firestore().collection("productos").get(),
       firebase.firestore().collection("pedidos").get(),
       firebase.firestore().collection("promociones").get(),
       firebase.firestore().collection("config").doc("logos").get(),
       firebase.firestore().collection("config").doc("general").get(),
       firebase.firestore().collection("config").doc("horarios").get(),
-      firebase.firestore().collection("config").doc("zonas").get()
-    ]).then(([pedidos,promos,logos,general,horarios,zonas])=>{
+      firebase.firestore().collection("config").doc("zonas").get(),
+      firebase.firestore().collection("config").doc("hero").get(),
+      firebase.firestore().collection("config").doc("seo").get(),
+      firebase.firestore().collection("config").doc("pwa").get(),
+      firebase.firestore().collection("config").doc("brandIdentity").get()
+    ]).then(([productos,pedidos,promos,logos,general,horarios,zonas,hero,seo,pwa,brand])=>{
+      data.productos=[];productos.forEach(d=>data.productos.push({id:d.id,...d.data()}));
       data.pedidos=[];pedidos.forEach(d=>data.pedidos.push({id:d.id,...d.data()}));
       data.promociones=[];promos.forEach(d=>data.promociones.push({id:d.id,...d.data()}));
       if(logos.exists) data.logos=logos.data();
       if(general.exists) data.generalConfig=general.data();
       if(horarios.exists) data.horarios=horarios.data();
       if(zonas.exists) data.zonas=zonas.data();
+      if(hero.exists) data.hero=hero.data();
+      if(seo.exists) data.seo=seo.data();
+      if(pwa.exists) data.pwa=pwa.data();
+      if(brand.exists) data.brandIdentity=brand.data();
       const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
       const url=URL.createObjectURL(blob);
       const a=document.createElement("a");a.href=url;a.download="medio-urbano-backup-"+new Date().toISOString().split("T")[0]+".json";a.click();
@@ -567,15 +576,22 @@ function importarRespaldo(file){
   reader.onload=e=>{
     try{
       const data=JSON.parse(e.target.result);
-      if(data.productos) localStorage.setItem("productos",JSON.stringify(data.productos));
       if(typeof firebase!=="undefined"&&firebase.firestore){
         const tasks=[];
-        if(data.pedidos) data.pedidos.forEach(p=>tasks.push(firebase.firestore().collection("pedidos").doc(p.id).set(p)));
+        if(data.productos) data.productos.forEach(p=>{
+          const id=p.id||String(Date.now()+Math.random());
+          tasks.push(firebase.firestore().collection("productos").doc(id).set(p));
+        });
+        if(data.pedidos) data.pedidos.forEach(p=>tasks.push(firebase.firestore().collection("pedidos").doc(p.id||String(Date.now()+Math.random())).set(p)));
         if(data.promociones) data.promociones.forEach(p=>tasks.push(firebase.firestore().collection("promociones").doc(p.id||String(Date.now()+Math.random())).set(p)));
         if(data.logos) tasks.push(firebase.firestore().collection("config").doc("logos").set(data.logos));
         if(data.generalConfig) tasks.push(firebase.firestore().collection("config").doc("general").set(data.generalConfig));
         if(data.horarios) tasks.push(firebase.firestore().collection("config").doc("horarios").set(data.horarios));
         if(data.zonas) tasks.push(firebase.firestore().collection("config").doc("zonas").set(data.zonas));
+        if(data.hero) tasks.push(firebase.firestore().collection("config").doc("hero").set(data.hero));
+        if(data.seo) tasks.push(firebase.firestore().collection("config").doc("seo").set(data.seo));
+        if(data.pwa) tasks.push(firebase.firestore().collection("config").doc("pwa").set(data.pwa));
+        if(data.brandIdentity) tasks.push(firebase.firestore().collection("config").doc("brandIdentity").set(data.brandIdentity));
         Promise.all(tasks).then(()=>{
           status.textContent="Importado correctamente. Recargando...";
           setTimeout(()=>location.reload(),1500);

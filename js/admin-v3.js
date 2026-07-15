@@ -1,6 +1,6 @@
 /*====================================================
 admin.js - MEDIO URBANO V3
-CRUD Productos con extras, estado, destacado, orden
+CRUD Productos via Firestore (real-time sync)
 =====================================================*/
 
 const ADMIN_PASSWORD="medio123";
@@ -114,12 +114,31 @@ function renderExtras(){
   });
 }
 
-/* PRODUCTOS */
-let productos=JSON.parse(localStorage.getItem("productos"))||[];
+/* PRODUCTOS - FIRESTORE CRUD */
+let productos=[];
+let productosUnsub=null;
 
-function guardarProductos(){
-  localStorage.setItem("productos",JSON.stringify(productos));
-  window.dispatchEvent(new Event("productosUpdated"));
+function initProductosFirestore(){
+  if(typeof firebase==="undefined"||!firebase.firestore){
+    console.warn("Firebase no disponible para productos");
+    return;
+  }
+  productosUnsub=firebase.firestore().collection("productos").orderBy("orden","asc").onSnapshot(snap=>{
+    productos=[];
+    snap.forEach(doc=>productos.push({id:doc.id,...doc.data()}));
+    mostrarProductos();
+    updateStats();
+  },err=>{
+    console.error("Error productos snapshot:",err);
+  });
+}
+
+function guardarProductoFirestore(data){
+  return firebase.firestore().collection("productos").doc(data.id).set(data);
+}
+
+function eliminarProductoFirestore(id){
+  return firebase.firestore().collection("productos").doc(id).delete();
 }
 
 function agregarProducto(){
@@ -133,21 +152,27 @@ function agregarProducto(){
   const destacado=document.getElementById("prodDestacado").checked;
   if(!nombre){alert("Ingresa el nombre del producto");return;}
 
+  const data={
+    nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,
+    extras:currentExtras,
+    updatedAt:new Date().toISOString()
+  };
+
   if(editProductId){
-    const idx=productos.findIndex(p=>p.id===editProductId);
-    if(idx>=0){
-      productos[idx]={...productos[idx],nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,extras:currentExtras};
-    }
+    data.id=editProductId;
+    guardarProductoFirestore(data).then(()=>{
+      if(typeof logAdminAction==="function") logAdminAction("producto","Producto editado",nombre+" · $"+precio+" · "+categoria);
+    });
     editProductId=null;
     document.getElementById("prodFormTitle").textContent="Agregar Producto";
     document.getElementById("prodSaveBtn").textContent="Guardar";
-    if(typeof logAdminAction==="function") logAdminAction("producto","Producto editado",nombre+" · $"+precio+" · "+categoria);
   }else{
-    productos.push({id:Date.now(),nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,extras:currentExtras});
-    if(typeof logAdminAction==="function") logAdminAction("producto","Producto agregado",nombre+" · $"+precio+" · "+categoria);
+    data.id=String(Date.now());
+    data.createdAt=new Date().toISOString();
+    guardarProductoFirestore(data).then(()=>{
+      if(typeof logAdminAction==="function") logAdminAction("producto","Producto agregado",nombre+" · $"+precio+" · "+categoria);
+    });
   }
-  guardarProductos();
-  mostrarProductos();
   limpiarFormulario();
 }
 
@@ -169,10 +194,9 @@ function limpiarFormulario(){
 function eliminarProducto(id){
   if(!confirm("¿Eliminar producto?")) return;
   const p=productos.find(x=>x.id===id);
-  productos=productos.filter(p=>p.id!==id);
-  guardarProductos();
-  mostrarProductos();
-  if(typeof logAdminAction==="function") logAdminAction("producto","Producto eliminado",p?(p.nombre+" · "+p.categoria):"id:"+id);
+  eliminarProductoFirestore(id).then(()=>{
+    if(typeof logAdminAction==="function") logAdminAction("producto","Producto eliminado",p?(p.nombre+" · "+p.categoria):"id:"+id);
+  });
 }
 
 function editarProducto(id){
@@ -224,8 +248,8 @@ function mostrarProductos(){
         <td>${producto.destacado?'<i class="fas fa-star" style="color:var(--primary);"></i>':'<span style="color:#444;">—</span>'}</td>
         <td>${producto.orden||0}</td>
         <td>
-          <button onclick="editarProducto(${producto.id})" class="edit-btn">Editar</button>
-          <button onclick="eliminarProducto(${producto.id})" class="delete-btn">Eliminar</button>
+          <button onclick="editarProducto('${producto.id}')" class="edit-btn">Editar</button>
+          <button onclick="eliminarProducto('${producto.id}')" class="delete-btn">Eliminar</button>
         </td>
       </tr>`;
   });
@@ -242,5 +266,5 @@ function updateStats(){
 }
 
 window.onload=()=>{
-  mostrarProductos();
+  initProductosFirestore();
 };

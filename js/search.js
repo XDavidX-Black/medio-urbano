@@ -5,11 +5,7 @@ search.js - MEDIO URBANO V3 - Buscador Inteligente
 let productosBusqueda=[];
 
 function cargarProductosBusqueda(){
-  const local=JSON.parse(localStorage.getItem("productos"));
-  if(local && local.length){
-    productosBusqueda=local;
-    return;
-  }
+  productosBusqueda=[];
   Object.keys(categorias).forEach(cat=>{
     if(categorias[cat].productos){
       categorias[cat].productos.forEach(producto=>{
