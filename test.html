@@ -6,6 +6,10 @@
   <title>Medio Urbano - V3</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <link rel="stylesheet" href="css/promos-carousel.css">
   <meta name="description" content="Medio Urbano | Cocina, Salad, Burgers y Pasta.">
   <meta name="keywords" content="comida,cancun,hamburguesas,ensaladas,pastas,comida casera">
   <meta name="author" content="Medio Urbano">
@@ -1006,29 +1010,6 @@
   <section class="promotions" id="promociones">
     <div class="container">
       <div class="section-title hidden"><h2>PROMOCIONES</h2></div>
-      <div class="promo-grid">
-        <div class="promo-card">
-          <img src="img/promo1.webp" alt="Promo 1" loading="lazy" decoding="async">
-          <div class="promo-info">
-            <h3>Combo Familiar</h3>
-            <p>Para toda la familia</p>
-          </div>
-        </div>
-        <div class="promo-card">
-          <img src="img/promo2.webp" alt="Promo 2" loading="lazy" decoding="async">
-          <div class="promo-info">
-            <h3>2x1 en Burgers</h3>
-            <p>Martes y Jueves</p>
-          </div>
-        </div>
-        <div class="promo-card">
-          <img src="img/promo3.webp" alt="Promo 3" loading="lazy" decoding="async">
-          <div class="promo-info">
-            <h3>Menú del Día</h3>
-            <p>Todos los días</p>
-          </div>
-        </div>
-      </div>
     </div>
   </section>
 
@@ -1347,25 +1328,6 @@
       });
     }
 
-    function renderPromosAdmin(){
-      const promos=JSON.parse(localStorage.getItem("promociones"))||[];
-      if(!promos.length) return;
-      const grid=document.querySelector(".promo-grid");
-      if(!grid) return;
-      const adminHTML=promos.map(p=>`
-        <div class="promo-card">
-          <img src="${p.imagen}" alt="${p.titulo}" loading="lazy" decoding="async">
-          <div class="promo-info">
-            <h3>${p.titulo}</h3>
-            <p>$${p.precio}</p>
-          </div>
-        </div>
-      `).join("");
-      grid.insertAdjacentHTML("beforeend",adminHTML);
-    }
-
-    renderPromosAdmin();
-
     window.addEventListener("storage",e=>{
       if(e.key==="productos"){
         cargarProductosAdmin();
@@ -1556,6 +1518,8 @@
   <script src="js/search.js"></script>
   <script src="js/lazyload.js"></script>
   <script src="js/pedidos.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/promos-carousel.js"></script>
   <script>
     if("serviceWorker" in navigator){
       window.addEventListener("load",()=>{
