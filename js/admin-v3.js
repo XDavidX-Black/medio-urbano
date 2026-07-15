@@ -1,12 +1,14 @@
 /*====================================================
 admin.js - MEDIO URBANO V3
+CRUD Productos con extras, estado, destacado, orden
 =====================================================*/
 
 const ADMIN_PASSWORD="medio123";
 
 function login(){
   const password=document.getElementById("password").value;
-  if(password===ADMIN_PASSWORD){
+  const stored=localStorage.getItem("adminPassword")||ADMIN_PASSWORD;
+  if(password===stored){
     localStorage.setItem("admin","true");
     window.location="panel-v3.html";
   }else{
@@ -27,6 +29,7 @@ function logout(){
 
 /* IMAGE UPLOAD HANDLING */
 let imagenBase64="";
+let editProductId=null;
 
 const uploadArea=document.getElementById("uploadArea");
 const imagenFile=document.getElementById("imagenFile");
@@ -40,9 +43,7 @@ if(uploadArea){
   uploadArea.addEventListener("drop",e=>{
     e.preventDefault();
     uploadArea.classList.remove("dragover");
-    if(e.dataTransfer.files.length){
-      procesarImagen(e.dataTransfer.files[0]);
-    }
+    if(e.dataTransfer.files.length) procesarImagen(e.dataTransfer.files[0]);
   });
   imagenFile.addEventListener("change",e=>{
     if(e.target.files.length) procesarImagen(e.target.files[0]);
@@ -50,14 +51,8 @@ if(uploadArea){
 }
 
 function procesarImagen(file){
-  if(!file.type.startsWith("image/")){
-    alert("Solo se permiten imágenes");
-    return;
-  }
-  if(file.size>500000){
-    alert("Imagen muy grande. Máximo 500KB");
-    return;
-  }
+  if(!file.type.startsWith("image/")){alert("Solo se permiten imágenes");return;}
+  if(file.size>500000){alert("Imagen muy grande. Máximo 500KB");return;}
   const reader=new FileReader();
   reader.onload=e=>{
     const img=new Image();
@@ -67,8 +62,7 @@ function procesarImagen(file){
       let w=img.width,h=img.height;
       if(w>h){if(w>MAX){h=h*MAX/w;w=MAX;}}
       else{if(h>MAX){w=w*MAX/h;h=MAX;}}
-      canvas.width=w;
-      canvas.height=h;
+      canvas.width=w;canvas.height=h;
       canvas.getContext("2d").drawImage(img,0,0,w,h);
       imagenBase64=canvas.toDataURL("image/jpeg",0.7);
       previewImg.src=imagenBase64;
@@ -90,6 +84,36 @@ function limpiarImagen(){
   if(imagenFile) imagenFile.value="";
 }
 
+/* EXTRAS */
+let currentExtras=[];
+
+function agregarExtra(){
+  const nombre=document.getElementById("extraNombre").value.trim();
+  const precio=Number(document.getElementById("extraPrecio").value)||0;
+  if(!nombre){return;}
+  currentExtras.push({nombre,precio,activo:true});
+  document.getElementById("extraNombre").value="";
+  document.getElementById("extraPrecio").value="";
+  renderExtras();
+}
+
+function removeExtra(i){
+  currentExtras.splice(i,1);
+  renderExtras();
+}
+
+function renderExtras(){
+  const el=document.getElementById("extrasList");
+  if(!el) return;
+  el.innerHTML="";
+  currentExtras.forEach((ex,i)=>{
+    el.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:13px;color:#ccc;">
+      <span style="flex:1;">${ex.nombre} <span style="color:var(--primary);">+$${ex.precio}</span></span>
+      <button onclick="removeExtra(${i})" style="padding:4px 10px;font-size:11px;background:#c62828;color:white;">X</button>
+    </div>`;
+  });
+}
+
 /* PRODUCTOS */
 let productos=JSON.parse(localStorage.getItem("productos"))||[];
 
@@ -104,8 +128,22 @@ function agregarProducto(){
   const descripcion=document.getElementById("descripcion").value.trim();
   const categoria=document.getElementById("categoria").value;
   const imagen=document.getElementById("imagen").value;
+  const orden=Number(document.getElementById("prodOrden").value)||0;
+  const estado=Number(document.getElementById("prodEstado").value);
+  const destacado=document.getElementById("prodDestacado").checked;
   if(!nombre){alert("Ingresa el nombre del producto");return;}
-  productos.push({id:Date.now(),nombre,precio,descripcion,categoria,imagen});
+
+  if(editProductId){
+    const idx=productos.findIndex(p=>p.id===editProductId);
+    if(idx>=0){
+      productos[idx]={...productos[idx],nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,extras:currentExtras};
+    }
+    editProductId=null;
+    document.getElementById("prodFormTitle").textContent="Agregar Producto";
+    document.getElementById("prodSaveBtn").textContent="Guardar";
+  }else{
+    productos.push({id:Date.now(),nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,extras:currentExtras});
+  }
   guardarProductos();
   mostrarProductos();
   limpiarFormulario();
@@ -115,10 +153,19 @@ function limpiarFormulario(){
   document.getElementById("nombre").value="";
   document.getElementById("precio").value="";
   document.getElementById("descripcion").value="";
+  document.getElementById("prodOrden").value="0";
+  document.getElementById("prodEstado").value="1";
+  document.getElementById("prodDestacado").checked=false;
+  currentExtras=[];
+  renderExtras();
   limpiarImagen();
+  editProductId=null;
+  document.getElementById("prodFormTitle").textContent="Agregar Producto";
+  document.getElementById("prodSaveBtn").textContent="Guardar";
 }
 
 function eliminarProducto(id){
+  if(!confirm("¿Eliminar producto?")) return;
   productos=productos.filter(p=>p.id!==id);
   guardarProductos();
   mostrarProductos();
@@ -126,10 +173,17 @@ function eliminarProducto(id){
 
 function editarProducto(id){
   const p=productos.find(item=>item.id===id);
+  if(!p) return;
+  editProductId=id;
   document.getElementById("nombre").value=p.nombre;
   document.getElementById("precio").value=p.precio;
-  document.getElementById("descripcion").value=p.descripcion;
+  document.getElementById("descripcion").value=p.descripcion||"";
   document.getElementById("categoria").value=p.categoria;
+  document.getElementById("prodOrden").value=p.orden||0;
+  document.getElementById("prodEstado").value=p.estado!==undefined?p.estado:1;
+  document.getElementById("prodDestacado").checked=!!p.destacado;
+  currentExtras=p.extras?[...p.extras]:[];
+  renderExtras();
   if(p.imagen&&p.imagen.startsWith("data:")){
     imagenBase64=p.imagen;
     previewImg.src=p.imagen;
@@ -138,26 +192,48 @@ function editarProducto(id){
   }else{
     document.getElementById("imagen").value=p.imagen||"";
   }
-  eliminarProducto(id);
+  document.getElementById("prodFormTitle").textContent="Editar Producto";
+  document.getElementById("prodSaveBtn").textContent="Actualizar";
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 function mostrarProductos(){
   const tabla=document.getElementById("tablaProductos");
   if(!tabla) return;
+  const filtroCat=document.getElementById("filtroCategoria")?.value||"";
+  const buscar=(document.getElementById("buscarProducto")?.value||"").toLowerCase();
+  let filtered=productos;
+  if(filtroCat) filtered=filtered.filter(p=>p.categoria===filtroCat);
+  if(buscar) filtered=filtered.filter(p=>p.nombre.toLowerCase().includes(buscar));
+  filtered.sort((a,b)=>(a.orden||0)-(b.orden||0));
   tabla.innerHTML="";
-  productos.forEach(producto=>{
+  filtered.forEach(producto=>{
+    const disponible=producto.estado!==0;
     tabla.innerHTML+=`
       <tr>
-        <td><img src="${producto.imagen||''}" width="60" style="border-radius:8px;${producto.imagen?'':'display:none;'}"></td>
+        <td><img src="${producto.imagen||''}" width="50" style="border-radius:8px;${producto.imagen?'':'display:none;'}"></td>
         <td>${producto.nombre}</td>
         <td>${producto.categoria}</td>
         <td>$${producto.precio}</td>
+        <td><span style="color:${disponible?'var(--success)':'var(--danger)'};font-weight:700;">${disponible?'Activo':'Inactivo'}</span></td>
+        <td>${producto.destacado?'<i class="fas fa-star" style="color:var(--primary);"></i>':'<span style="color:#444;">—</span>'}</td>
+        <td>${producto.orden||0}</td>
         <td>
           <button onclick="editarProducto(${producto.id})" class="edit-btn">Editar</button>
           <button onclick="eliminarProducto(${producto.id})" class="delete-btn">Eliminar</button>
         </td>
       </tr>`;
   });
+}
+
+function updateStats(){
+  document.getElementById("statProductos").textContent=productos.length;
+  if(typeof firebase!=="undefined"&&firebase.firestore){
+    firebase.firestore().collection("promociones").get().then(snap=>{
+      const el=document.getElementById("statPromos");
+      if(el) el.textContent=snap.size;
+    }).catch(()=>{});
+  }
 }
 
 window.onload=()=>{

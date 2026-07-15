@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <title>Dashboard | Medio Urbano</title>
+  <title>Panel Admin | Medio Urbano</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"/>
   <link rel="stylesheet" href="css/variables.css">
@@ -18,8 +18,16 @@
       <li onclick="showSection('productos')" data-section="productos"><i class="fas fa-utensils"></i> Productos</li>
       <li onclick="showSection('promociones')" data-section="promociones"><i class="fas fa-tag"></i> Promociones</li>
       <li onclick="showSection('pedidos')" data-section="pedidos"><i class="fas fa-receipt"></i> Pedidos</li>
+      <li onclick="showSection('clientes')" data-section="clientes"><i class="fas fa-users"></i> Clientes</li>
+      <li onclick="showSection('horarios')" data-section="horarios"><i class="fas fa-clock"></i> Horarios</li>
+      <li onclick="showSection('zonas')" data-section="zonas"><i class="fas fa-map-marker-alt"></i> Zonas de Entrega</li>
       <li onclick="showSection('config')" data-section="config"><i class="fas fa-cog"></i> Configuración</li>
       <li onclick="showSection('marcas')" data-section="marcas"><i class="fas fa-palette"></i> Identidad de Marca</li>
+      <li onclick="showSection('hero')" data-section="hero"><i class="fas fa-image"></i> Hero</li>
+      <li onclick="showSection('seo')" data-section="seo"><i class="fas fa-search"></i> SEO / PWA</li>
+      <li onclick="showSection('reportes')" data-section="reportes"><i class="fas fa-chart-bar"></i> Reportes</li>
+      <li onclick="showSection('respaldos')" data-section="respaldos"><i class="fas fa-database"></i> Respaldos</li>
+      <li onclick="showSection('seguridad')" data-section="seguridad"><i class="fas fa-shield-alt"></i> Seguridad</li>
       <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</li>
     </ul>
   </aside>
@@ -27,40 +35,38 @@
     <!-- DASHBOARD -->
     <div id="sec-dashboard" class="dashboard-section">
       <div class="dashboard">
-        <div class="dashboard-cards">
-          <div class="card">
-            <div><h2 id="statProductos">0</h2><span>Productos</span></div>
-            <i class="fas fa-utensils"></i>
-          </div>
-          <div class="card">
-            <div><h2 id="statPromos">0</h2><span>Promociones</span></div>
-            <i class="fas fa-tag"></i>
-          </div>
-          <div class="card">
-            <div><h2 id="statPedidos">0</h2><span>Pedidos Hoy</span></div>
-            <i class="fas fa-receipt"></i>
-          </div>
-          <div class="card">
-            <div><h2 id="statIngresos">$0</h2><span>Ingresos</span></div>
-            <i class="fas fa-dollar-sign"></i>
-          </div>
+        <div class="dashboard-cards" id="dashCards">
+          <div class="card"><div><h2 id="statProductos">0</h2><span>Productos</span></div><i class="fas fa-utensils"></i></div>
+          <div class="card"><div><h2 id="statPromos">0</h2><span>Promociones</span></div><i class="fas fa-tag"></i></div>
+          <div class="card"><div><h2 id="statPedidos">0</h2><span>Pedidos Hoy</span></div><i class="fas fa-receipt"></i></div>
+          <div class="card"><div><h2 id="statPendientes">0</h2><span>Pendientes</span></div><i class="fas fa-hourglass-half"></i></div>
+          <div class="card"><div><h2 id="statPreparando">0</h2><span>Preparando</span></div><i class="fas fa-fire"></i></div>
+          <div class="card"><div><h2 id="statReparto">0</h2><span>En Reparto</span></div><i class="fas fa-motorcycle"></i></div>
+          <div class="card"><div><h2 id="statEntregados">0</h2><span>Entregados</span></div><i class="fas fa-check-circle"></i></div>
+          <div class="card"><div><h2 id="statIngresos">$0</h2><span>Ingresos Hoy</span></div><i class="fas fa-dollar-sign"></i></div>
+          <div class="card"><div><h2 id="statIngresosSem">$0</h2><span>Ingresos Semana</span></div><i class="fas fa-calendar-week"></i></div>
+          <div class="card"><div><h2 id="statIngresosMes">$0</h2><span>Ingresos Mes</span></div><i class="fas fa-calendar-alt"></i></div>
+          <div class="card"><div><h2 id="statClientes">0</h2><span>Clientes</span></div><i class="fas fa-users"></i></div>
+          <div class="card"><div><h2 id="statMasVendido">-</h2><span>Más Vendido</span></div><i class="fas fa-trophy"></i></div>
+          <div class="card"><div><h2 id="statMarcaTop">-</h2><span>Marca Top</span></div><i class="fas fa-crown"></i></div>
         </div>
         <div class="dashboard-grid">
           <div class="orders">
             <h2>Pedidos Recientes</h2>
-            <div id="listaPedidos">
-              <p style="color:#666;text-align:center;padding:30px;">Sin pedidos aún</p>
-            </div>
+            <div id="listaPedidos"><p style="color:#666;text-align:center;padding:30px;">Cargando...</p></div>
           </div>
           <div class="activity">
             <h2>Actividad</h2>
-            <ul id="listaActividad">
-              <li><i class="fas fa-circle"></i><div><strong>Sistema iniciado</strong><br><small>Ahora</small></div></li>
-            </ul>
+            <ul id="listaActividad"><li><i class="fas fa-circle"></i><div><strong>Sistema iniciado</strong><br><small>Ahora</small></div></li></ul>
           </div>
         </div>
-        <div class="chart">
-          <p><i class="fas fa-chart-line" style="font-size:40px;display:block;margin-bottom:15px;"></i>Gráficas próximamente</p>
+        <div class="chart-container">
+          <h2 style="color:var(--primary);margin-bottom:20px;">Ventas por Día (Últimos 7 días)</h2>
+          <div class="chart" id="chartVentas"></div>
+        </div>
+        <div class="chart-container">
+          <h2 style="color:var(--primary);margin:20px 0;">Ventas por Marca</h2>
+          <div class="chart" id="chartMarcas" style="height:250px;"></div>
         </div>
       </div>
     </div>
@@ -68,34 +74,65 @@
     <!-- PRODUCTOS -->
     <div id="sec-productos" class="dashboard-section" style="display:none;">
       <section>
-        <h2>Agregar Producto</h2>
-        <input id="nombre" placeholder="Nombre">
-        <input id="precio" placeholder="Precio (dejar en 0 para ocultar)">
-        <div class="upload-area" id="uploadArea">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <p>Arrastra una imagen o haz clic para seleccionar</p>
-          <input type="file" id="imagenFile" accept="image/*" style="display:none;">
+        <h2 id="prodFormTitle">Agregar Producto</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Nombre *</label>
+            <input id="nombre" placeholder="Nombre del producto">
+            <label>Precio</label>
+            <input id="precio" placeholder="Precio" type="number" step="0.01">
+            <label>Descripción</label>
+            <textarea id="descripcion" placeholder="Descripción"></textarea>
+            <label>Categoría</label>
+            <select id="categoria">
+              <option value="cocina">Cocina</option>
+              <option value="salad">Salad</option>
+              <option value="burgers">Burgers</option>
+              <option value="pasta">Pasta</option>
+            </select>
+            <div class="form-row-2">
+              <div><label>Orden</label><input id="prodOrden" type="number" value="0" placeholder="0"></div>
+              <div><label>Estado</label>
+                <select id="prodEstado"><option value="1">Disponible</option><option value="0">No disponible</option></select>
+              </div>
+            </div>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:15px;">
+              <input type="checkbox" id="prodDestacado" style="width:auto;margin:0;"> Producto destacado
+            </label>
+          </div>
+          <div class="form-col">
+            <label>Imagen</label>
+            <div class="upload-area" id="uploadArea">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <p>Arrastra o haz clic</p>
+              <input type="file" id="imagenFile" accept="image/*" style="display:none;">
+            </div>
+            <div id="imagenPreview" style="display:none;margin:15px 0;">
+              <img id="previewImg" style="max-width:200px;border-radius:12px;">
+              <button type="button" onclick="limpiarImagen()" style="margin-left:10px;background:#c62828;color:white;padding:8px 16px;">Quitar</button>
+            </div>
+            <input type="hidden" id="imagen" value="">
+            <label>Extras del producto</label>
+            <div id="extrasList" style="margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;">
+              <input id="extraNombre" placeholder="Nombre extra" style="margin:0;flex:1;">
+              <input id="extraPrecio" placeholder="+$0" type="number" style="margin:0;width:100px;">
+              <button type="button" onclick="agregarExtra()" style="padding:10px 16px;font-size:13px;white-space:nowrap;">+ Extra</button>
+            </div>
+          </div>
         </div>
-        <div id="imagenPreview" style="display:none;margin:15px 0;">
-          <img id="previewImg" style="max-width:200px;border-radius:12px;">
-          <button type="button" onclick="limpiarImagen()" style="margin-left:10px;background:#c62828;color:white;padding:8px 16px;">Quitar</button>
-        </div>
-        <input type="hidden" id="imagen" value="">
-        <textarea id="descripcion" placeholder="Descripción"></textarea>
-        <select id="categoria">
-          <option value="cocina">Cocina</option>
-          <option value="salad">Salad</option>
-          <option value="burgers">Burgers</option>
-          <option value="pasta">Pasta</option>
-        </select>
-        <button onclick="agregarProducto()">Guardar</button>
+        <button onclick="agregarProducto()" id="prodSaveBtn" style="margin-top:15px;">Guardar</button>
       </section>
       <section>
         <h2>Productos</h2>
+        <div style="display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap;">
+          <select id="filtroCategoria" onchange="mostrarProductos()" style="width:auto;padding:10px 15px;">
+            <option value="">Todas</option><option value="cocina">Cocina</option><option value="salad">Salad</option><option value="burgers">Burgers</option><option value="pasta">Pasta</option>
+          </select>
+          <input id="buscarProducto" placeholder="Buscar producto..." oninput="mostrarProductos()" style="width:250px;padding:10px 15px;">
+        </div>
         <table>
-          <thead>
-            <tr><th>Imagen</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr>
-          </thead>
+          <thead><tr><th>Img</th><th>Nombre</th><th>Cat</th><th>Precio</th><th>Estado</th><th>Dest</th><th>Orden</th><th>Acciones</th></tr></thead>
           <tbody id="tablaProductos"></tbody>
         </table>
       </section>
@@ -106,41 +143,57 @@
       <section>
         <h2 id="promoFormTitle">Agregar Promoción</h2>
         <div id="promoStatsList" style="margin-bottom:20px;color:#ccc;font-size:14px;"></div>
-        <input id="promoAdminTitulo" placeholder="Título *">
-        <input id="promoAdminDesc" placeholder="Descripción">
-        <input id="promoAdminPrecio" placeholder="Precio (ej: $99 o Gratis)">
-        <select id="promoAdminMarca">
-          <option value="MEDIO URBANO">Medio Urbano (General)</option>
-          <option value="BURGERS">Burgers</option>
-          <option value="COCINA">Cocina</option>
-          <option value="PASTA">Pasta</option>
-          <option value="SALAD">Salad</option>
-        </select>
-        <input id="promoAdminBtn" placeholder="Texto del botón (Ver Menú / Ordenar Ahora)">
-        <input id="promoAdminUrl" placeholder="URL del botón (#, wa.me/..., https://...)">
-        <label style="display:block;margin:15px 0 8px;color:#ccc;font-size:14px;">Imagen de fondo (1920x900 recomendado)</label>
-        <div class="upload-area" id="promoUploadArea">
-          <i class="fas fa-cloud-upload-alt"></i>
-          <p>Arrastra una imagen o haz clic para seleccionar</p>
-          <input type="file" id="promoAdminFile" accept="image/*" style="display:none;">
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Título *</label>
+            <input id="promoAdminTitulo" placeholder="Título">
+            <label>Descripción</label>
+            <input id="promoAdminDesc" placeholder="Descripción">
+            <label>Precio</label>
+            <input id="promoAdminPrecio" placeholder="$99 o Gratis">
+            <label>Marca</label>
+            <select id="promoAdminMarca">
+              <option value="MEDIO URBANO">General</option>
+              <option value="BURGERS">Burgers</option><option value="COCINA">Cocina</option><option value="PASTA">Pasta</option><option value="SALAD">Salad</option>
+            </select>
+            <label>Texto del botón</label>
+            <input id="promoAdminBtn" placeholder="Ver Menú">
+            <label>Acción del botón</label>
+            <select id="promoAdminAccion">
+              <option value="carrito">Agregar al carrito</option>
+              <option value="categoria">Abrir categoría</option>
+              <option value="seccion">Ir a sección</option>
+            </select>
+          </div>
+          <div class="form-col">
+            <div class="form-row-2">
+              <div><label>Fecha inicio</label><input id="promoFechaInicio" type="date"></div>
+              <div><label>Fecha fin</label><input id="promoFechaFin" type="date"></div>
+            </div>
+            <label>Orden carrusel</label>
+            <input id="promoAdminOrden" type="number" value="0">
+            <label>Imagen</label>
+            <div class="upload-area" id="promoUploadArea">
+              <i class="fas fa-cloud-upload-alt"></i><p>Arrastra o haz clic</p>
+              <input type="file" id="promoAdminFile" accept="image/*" style="display:none;">
+            </div>
+            <div id="promoImgPreview" style="display:none;margin:10px 0;">
+              <img id="promoPreviewImg" style="max-width:300px;border-radius:12px;">
+              <button type="button" onclick="limpiarPromoImagen()" style="margin-left:10px;background:#c62828;color:white;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Quitar</button>
+            </div>
+            <div class="upload-progress" id="promoProgress"><div class="bar" id="promoProgressBar"></div></div>
+            <div id="promoImgSize" style="color:#888;font-size:12px;margin-top:5px;"></div>
+          </div>
         </div>
-        <div id="promoImgPreview" style="display:none;margin:10px 0;">
-          <img id="promoPreviewImg" style="max-width:300px;border-radius:12px;">
-          <button type="button" onclick="limpiarPromoImagen()" style="margin-left:10px;background:#c62828;color:white;padding:8px 16px;border:none;border-radius:8px;cursor:pointer;">Quitar</button>
-        </div>
-        <div class="upload-progress" id="promoProgress"><div class="bar" id="promoProgressBar"></div></div>
-        <div id="promoImgSize" style="color:#888;font-size:12px;margin-top:5px;"></div>
         <div style="display:flex;gap:10px;margin-top:15px;">
-          <button id="promoAdminSaveBtn" onclick="guardarPromoAdmin()" style="flex:1;">Guardar Promoción</button>
+          <button id="promoAdminSaveBtn" onclick="guardarPromoAdmin()" style="flex:1;">Guardar</button>
           <button id="promoAdminCancelBtn" onclick="limpiarPromoForm()" style="display:none;background:#666;color:white;">Cancelar</button>
         </div>
       </section>
       <section>
-        <h2>Promociones del Carrusel</h2>
+        <h2>Promociones</h2>
         <table>
-          <thead>
-            <tr><th>Imagen</th><th>Título</th><th>Marca</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
-          </thead>
+          <thead><tr><th>Img</th><th>Título</th><th>Marca</th><th>Precio</th><th>Clicks</th><th>Pedidos</th><th>Estado</th><th>Acciones</th></tr></thead>
           <tbody id="tablaAdminPromos"></tbody>
         </table>
       </section>
@@ -149,10 +202,101 @@
     <!-- PEDIDOS -->
     <div id="sec-pedidos" class="dashboard-section" style="display:none;">
       <section>
-        <h2>Todos los Pedidos</h2>
-        <div id="listaPedidosFull">
-          <p style="color:#666;text-align:center;padding:30px;">Sin pedidos aún</p>
+        <h2>Gestión de Pedidos</h2>
+        <div class="filtros-pedidos" style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <input id="filtroCliente" placeholder="Buscar cliente..." oninput="renderPedidosPanel()" style="width:200px;padding:10px 15px;">
+          <input id="filtroTelefono" placeholder="Buscar teléfono..." oninput="renderPedidosPanel()" style="width:180px;padding:10px 15px;">
+          <select id="filtroEstadoPed" onchange="renderPedidosPanel()" style="width:auto;padding:10px 15px;">
+            <option value="">Todos</option><option value="Pendiente">Pendiente</option><option value="Preparando">Preparando</option><option value="En reparto">En reparto</option><option value="Entregado">Entregado</option><option value="Cancelado">Cancelado</option>
+          </select>
+          <select id="filtroMarcaPed" onchange="renderPedidosPanel()" style="width:auto;padding:10px 15px;">
+            <option value="">Todas</option><option value="cocina">Cocina</option><option value="salad">Salad</option><option value="burgers">Burgers</option><option value="pasta">Pasta</option>
+          </select>
+          <input id="filtroFechaPed" type="date" onchange="renderPedidosPanel()" style="width:auto;padding:10px 15px;">
         </div>
+        <div id="listaPedidosFull"><p style="color:#666;text-align:center;padding:30px;">Cargando...</p></div>
+      </section>
+    </div>
+
+    <!-- CLIENTES -->
+    <div id="sec-clientes" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Clientes</h2>
+        <input id="buscarCliente" placeholder="Buscar cliente..." oninput="renderClientes()" style="width:300px;padding:10px 15px;margin-bottom:20px;">
+        <div id="listaClientes"><p style="color:#666;text-align:center;padding:30px;">Cargando...</p></div>
+      </section>
+    </div>
+
+    <!-- HORARIOS -->
+    <div id="sec-horarios" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Horarios por Marca</h2>
+        <p style="color:#aaa;margin-bottom:20px;font-size:14px;">Configura los horarios de atención de cada marca.</p>
+        <div id="horariosGrid"></div>
+        <button onclick="guardarHorarios()" style="margin-top:20px;">Guardar Horarios</button>
+      </section>
+    </div>
+
+    <!-- ZONAS DE ENTREGA -->
+    <div id="sec-zonas" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Zonas de Entrega</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Colonias</label>
+            <textarea id="zonaColonias" placeholder="Una colonia por línea"></textarea>
+            <div class="form-row-2">
+              <div><label>Costo de envío</label><input id="zonaCosto" type="number" step="0.01" placeholder="0"></div>
+              <div><label>Pedido mínimo</label><input id="zonaMinimo" type="number" step="0.01" placeholder="0"></div>
+            </div>
+            <label>Tiempo estimado (min)</label>
+            <input id="zonaTiempo" type="number" placeholder="30">
+            <button onclick="agregarZona()">Agregar Zona</button>
+          </div>
+          <div class="form-col">
+            <div id="listaZonas"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- CONFIGURACION -->
+    <div id="sec-config" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Configuración General</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Nombre del negocio</label>
+            <input id="cfgNombre" placeholder="Medio Urbano">
+            <label>WhatsApp</label>
+            <input id="cfgWhatsapp" placeholder="529983852946">
+            <label>Correo</label>
+            <input id="cfgEmail" type="email" placeholder="correo@ejemplo.com">
+            <label>Dirección</label>
+            <input id="cfgDireccion" placeholder="Dirección del negocio">
+            <label>Costo de envío default</label>
+            <input id="cfgEnvio" type="number" step="0.01" placeholder="0">
+            <label>Pedido mínimo</label>
+            <input id="cfgMinimo" type="number" step="0.01" placeholder="0">
+            <label>Tiempo estimado (min)</label>
+            <input id="cfgTiempo" type="number" placeholder="30">
+          </div>
+          <div class="form-col">
+            <label>Google Maps URL</label>
+            <input id="cfgMaps" placeholder="https://maps.google.com/...">
+            <label>Facebook</label>
+            <input id="cfgFacebook" placeholder="https://facebook.com/...">
+            <label>Instagram</label>
+            <input id="cfgInstagram" placeholder="https://instagram.com/...">
+            <label>TikTok</label>
+            <input id="cfgTiktok" placeholder="https://tiktok.com/...">
+            <label>Métodos de pago</label>
+            <input id="cfgMetodosPago" placeholder="Efectivo, Transferencia" value="Efectivo, Transferencia">
+            <label>Mensaje WhatsApp automático</label>
+            <textarea id="cfgMsgWhatsapp" placeholder="Mensaje predeterminado"></textarea>
+          </div>
+        </div>
+        <button onclick="guardarConfigGeneral()">Guardar Configuración</button>
       </section>
     </div>
 
@@ -160,23 +304,177 @@
     <div id="sec-marcas" class="dashboard-section" style="display:none;">
       <section>
         <h2>Identidad de Marca</h2>
-        <p style="color:#aaa;margin-bottom:25px;">Sube los logos de cada marca. Se mostrarán automáticamente en el formulario de pedidos y en el sitio.</p>
+        <p style="color:#aaa;margin-bottom:25px;">Logos, colores e identidad visual de cada marca.</p>
         <div id="brandLogosGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:20px;"></div>
+        <div style="margin-top:30px;">
+          <h2>Colores de Marca</h2>
+          <div class="form-grid" style="margin-top:15px;">
+            <div class="form-col">
+              <label>Color principal</label>
+              <input id="brandColorPrimario" type="color" value="#FFD028" style="height:50px;padding:5px;">
+              <label>Color secundario</label>
+              <input id="brandColorSecundario" type="color" value="#111111" style="height:50px;padding:5px;">
+            </div>
+            <div class="form-col">
+              <label>Slogan</label>
+              <input id="brandSlogan" placeholder="Fast Food con estilo urbano">
+              <label>Descripción</label>
+              <textarea id="brandDescripcion" placeholder="Descripción del negocio"></textarea>
+            </div>
+          </div>
+          <button onclick="guardarBrandIdentity()" style="margin-top:15px;">Guardar Identidad</button>
+        </div>
       </section>
     </div>
 
-    <!-- CONFIGURACION -->
-    <div id="sec-config" class="dashboard-section" style="display:none;">
+    <!-- HERO -->
+    <div id="sec-hero" class="dashboard-section" style="display:none;">
       <section>
-        <h2>Configuración</h2>
-        <label style="display:block;margin-bottom:15px;color:#ccc;">Número de WhatsApp</label>
-        <input id="cfgWhatsapp" placeholder="529983852946" value="529983852946">
-        <label style="display:block;margin-bottom:15px;color:#ccc;">Contraseña Admin</label>
-        <input id="cfgPassword" placeholder="medio123" type="password">
-        <button onclick="guardarConfig()">Guardar</button>
+        <h2>Hero Principal</h2>
+        <p style="color:#aaa;margin-bottom:20px;font-size:14px;">Edita el contenido del Hero que se muestra en la página principal.</p>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Título</label>
+            <input id="heroTitulo" placeholder="¿HOY NO QUIERES COCINAR?">
+            <label>Subtítulo</label>
+            <input id="heroSubtitulo" placeholder="MEDIO URBANO BURGERS">
+            <label>Texto descriptivo</label>
+            <input id="heroTexto" placeholder="Nosotros nos encargamos">
+          </div>
+          <div class="form-col">
+            <label>Texto del botón</label>
+            <input id="heroBtnTexto" placeholder="EXPLORAR MENÚ">
+            <label>Acción del botón</label>
+            <select id="heroBtnAccion"><option value="marcas">Ir a Marcas</option><option value="contacto">Ir a Contacto</option></select>
+            <label>Activo</label>
+            <select id="heroActivo"><option value="1">Sí</option><option value="0">No</option></select>
+          </div>
+        </div>
+        <button onclick="guardarHero()" style="margin-top:15px;">Guardar Hero</button>
+      </section>
+    </div>
+
+    <!-- SEO / PWA -->
+    <div id="sec-seo" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>SEO</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Título de la página</label>
+            <input id="seoTitle" placeholder="Medio Urbano">
+            <label>Descripción</label>
+            <textarea id="seoDescription" placeholder="Descripción del sitio"></textarea>
+            <label>Keywords</label>
+            <input id="seoKeywords" placeholder="comida, hamburguesas, pasta...">
+          </div>
+          <div class="form-col">
+            <label>Open Graph Image URL</label>
+            <input id="seoOgImage" placeholder="https://...">
+            <label>Twitter Handle</label>
+            <input id="seoTwitter" placeholder="@mediourbano">
+          </div>
+        </div>
+        <button onclick="guardarSEO()" style="margin-top:15px;">Guardar SEO</button>
+      </section>
+      <section>
+        <h2>PWA</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Nombre de la app</label>
+            <input id="pwaName" placeholder="Medio Urbano">
+            <label>Descripción</label>
+            <input id="pwaDesc" placeholder="Food ordering app">
+            <label>Color del tema</label>
+            <input id="pwaColor" type="color" value="#FFD028" style="height:50px;padding:5px;">
+          </div>
+          <div class="form-col">
+            <label>URL del ícono 192x192</label>
+            <input id="pwaIcon192" placeholder="icon-192.png">
+            <label>URL del ícono 512x512</label>
+            <input id="pwaIcon512" placeholder="icon-512.png">
+            <label>Background Color</label>
+            <input id="pwaBgColor" type="color" value="#0d0d0d" style="height:50px;padding:5px;">
+          </div>
+        </div>
+        <button onclick="guardarPWA()" style="margin-top:15px;">Guardar PWA</button>
+      </section>
+    </div>
+
+    <!-- REPORTES -->
+    <div id="sec-reportes" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Reportes</h2>
+        <div class="form-row-2" style="margin-bottom:20px;">
+          <div>
+            <label>Fecha inicio</label>
+            <input id="reporteFechaInicio" type="date">
+          </div>
+          <div>
+            <label>Fecha fin</label>
+            <input id="reporteFechaFin" type="date">
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;">
+          <button onclick="generarReporte()"><i class="fas fa-chart-bar"></i> Generar</button>
+          <button onclick="exportarCSV()" style="background:#333;color:white;"><i class="fas fa-file-csv"></i> CSV</button>
+          <button onclick="exportarExcel()" style="background:#217346;color:white;"><i class="fas fa-file-excel"></i> Excel</button>
+        </div>
+        <div id="reporteResultado"></div>
+      </section>
+    </div>
+
+    <!-- RESPALDOS -->
+    <div id="sec-respaldos" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Respaldos</h2>
+        <p style="color:#aaa;margin-bottom:20px;">Exporta o importa todos los datos del sistema.</p>
+        <div style="display:flex;gap:15px;flex-wrap:wrap;">
+          <button onclick="exportarRespaldo()" style="flex:1;"><i class="fas fa-download"></i> Exportar Respaldo</button>
+          <label style="flex:1;padding:15px;background:var(--primary);border:none;border-radius:12px;cursor:pointer;font-weight:700;text-align:center;">
+            <i class="fas fa-upload"></i> Importar Respaldo
+            <input type="file" accept=".json" onchange="importarRespaldo(this.files[0])" style="display:none;">
+          </label>
+        </div>
+        <div id="backupStatus" style="margin-top:15px;color:#888;font-size:14px;"></div>
+      </section>
+    </div>
+
+    <!-- SEGURIDAD -->
+    <div id="sec-seguridad" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Seguridad</h2>
+        <div class="form-grid">
+          <div class="form-col">
+            <label>Cambiar contraseña</label>
+            <input id="segPasswordActual" type="password" placeholder="Contraseña actual">
+            <input id="segPasswordNueva" type="password" placeholder="Nueva contraseña">
+            <input id="segPasswordConfirm" type="password" placeholder="Confirmar contraseña">
+            <button onclick="cambiarPassword()">Cambiar Contraseña</button>
+          </div>
+          <div class="form-col">
+            <label>Último acceso</label>
+            <input id="segUltimoAcceso" readonly style="opacity:.6;">
+            <label>Actividad reciente</label>
+            <div id="segActividad" style="max-height:300px;overflow-y:auto;"></div>
+          </div>
+        </div>
       </section>
     </div>
   </main>
+
+  <!-- ORDER DETAIL MODAL -->
+  <div class="order-modal" id="pedidoDetailModal">
+    <div class="order-modal-content" style="max-width:600px;">
+      <button type="button" class="order-modal-close" onclick="closePedidoDetail()"><i class="fas fa-times"></i></button>
+      <div id="pedidoDetailContent" style="padding:30px;max-height:80vh;overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION SOUND -->
+  <audio id="notifSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczIj2NycywaT4nQZDIyrBpPiZBkcfKsGk+JkGRx8qwaT4mQZHHSrBpPiZBkcdKsGk+JkGRx0qwaT4mQZHHSrBpPiZBkcdKsGk+JkGRx0qwaT4mQZHHSrBpPiZBkcdKsGk+JkGRx0qwaT4mQZHHSrBpPiZB" type="audio/wav">
+  </audio>
+
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
@@ -185,42 +483,48 @@
   <script src="js/admin-promos.js"></script>
   <script src="js/brand-identity.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/panel-manager.js"></script>
   <script>
-    // NAV
     function showSection(name){
       document.querySelectorAll(".dashboard-section").forEach(s=>s.style.display="none");
       document.getElementById("sec-"+name).style.display="";
-      document.querySelectorAll("aside li[data-section]").forEach(li=>{
-        li.classList.toggle("active",li.dataset.section===name);
-      });
+      document.querySelectorAll("aside li[data-section]").forEach(li=>{li.classList.toggle("active",li.dataset.section===name);});
     }
-
-    // STATS
-    function updateStats(){
-      const prods=JSON.parse(localStorage.getItem("productos"))||[];
-      document.getElementById("statProductos").textContent=prods.length;
-      if(typeof firebase!=="undefined"&&firebase.firestore){
-        firebase.firestore().collection("promociones").get().then(snap=>{
-          document.getElementById("statPromos").textContent=snap.size;
-        }).catch(()=>{});
-      }
-    }
-
-    // CONFIG
-    function guardarConfig(){
-      localStorage.setItem("cfgWhatsapp",document.getElementById("cfgWhatsapp").value);
-      localStorage.setItem("cfgPassword",document.getElementById("cfgPassword").value);
-      alert("Guardado");
-    }
-
     updateStats();
     initAdminPromos();
     initBrandIdentity();
+    initPanelManager();
   </script>
   <style>
     aside li.active{background:var(--primary);color:#111;font-weight:700;}
     aside li i{margin-right:10px;width:18px;text-align:center;}
     aside li{display:flex;align-items:center;}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:25px;}
+    .form-col label{display:block;color:#aaa;font-size:13px;margin-bottom:5px;margin-top:10px;}
+    .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+    .chart-container{background:#141414;border-radius:20px;padding:30px;margin-top:20px;}
+    .chart{min-height:200px;display:flex;align-items:flex-end;gap:8px;padding:20px;}
+    .chart-bar{background:var(--primary);border-radius:6px 6px 0 0;flex:1;min-width:30px;transition:.3s;position:relative;}
+    .chart-bar:hover{opacity:.8;}
+    .chart-bar span{position:absolute;top:-20px;left:50%;transform:translateX(-50%);font-size:11px;color:#aaa;white-space:nowrap;}
+    .status-badge{padding:6px 12px;border-radius:50px;font-size:12px;font-weight:700;display:inline-block;}
+    .status-pendiente{background:#ff9800;color:white;}
+    .status-preparando{background:#2196f3;color:white;}
+    .status-reparto{background:#9c27b0;color:white;}
+    .status-entregado{background:#35c759;color:white;}
+    .status-cancelado{background:#ff3b30;color:white;}
+    .cliente-card{background:#1a1a1a;border-radius:16px;padding:20px;margin-bottom:12px;border:1px solid rgba(255,255,255,.06);}
+    .zona-card{background:#1a1a1a;border-radius:12px;padding:15px;margin-bottom:10px;border:1px solid rgba(255,255,255,.06);display:flex;justify-content:space-between;align-items:center;}
+    .horario-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+    .horario-card{background:#1a1a1a;border-radius:16px;padding:20px;border:1px solid rgba(255,255,255,.06);}
+    .horario-card h3{color:var(--primary);margin-bottom:15px;font-size:16px;}
+    .horario-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:13px;color:#ccc;}
+    .horario-row label{min-width:60px;}
+    .horario-row input{padding:8px;width:90px;background:#111;border:1px solid rgba(255,255,255,.08);border-radius:8px;color:white;font-size:13px;}
+    @media(max-width:900px){
+      .form-grid{grid-template-columns:1fr;}
+      .form-row-2{grid-template-columns:1fr;}
+    }
   </style>
 </body>
 </html>

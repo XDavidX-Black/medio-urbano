@@ -1,7 +1,7 @@
 /*====================================================
 admin-promos.js - MEDIO URBANO V3
-CRUD Promociones con Firestore (sin Storage)
-Imágenes comprimidas guardadas como base64 en Firestore
+CRUD Promociones con Firestore
+Campos: feches, acción botón, analytics
 =====================================================*/
 
 let promosAdmin=[];
@@ -16,7 +16,6 @@ function initAdminPromos(){
   loadAdminPromos();
 }
 
-/* ========== UPLOAD AREA ========== */
 function setupPromoUpload(){
   const area=document.getElementById("promoUploadArea");
   const fileInput=document.getElementById("promoAdminFile");
@@ -38,7 +37,7 @@ function handlePromoFile(file){
       document.getElementById("promoPreviewImg").src=result.dataUrl;
       document.getElementById("promoImgPreview").style.display="block";
       document.getElementById("promoUploadArea").style.display="none";
-      if(sizeEl) sizeEl.textContent+=" → "+(result.dataUrl.length*0.75/1024).toFixed(0)+"KB (listo para Firestore)";
+      if(sizeEl) sizeEl.textContent+=" → "+(result.dataUrl.length*0.75/1024).toFixed(0)+"KB";
     });
   };
   reader.readAsDataURL(file);
@@ -68,7 +67,6 @@ function limpiarPromoImagen(){
   document.getElementById("promoImgSize").textContent="";
 }
 
-/* ========== NOTIFICATION ========== */
 function showPromoNotif(type,msg){
   const old=document.querySelector(".promo-notif");
   if(old) old.remove();
@@ -81,7 +79,6 @@ function showPromoNotif(type,msg){
   setTimeout(()=>{div.style.transform="translateX(120%)";div.style.opacity="0";setTimeout(()=>div.remove(),400);},3000);
 }
 
-/* ========== LOAD ========== */
 function loadAdminPromos(){
   firebase.firestore().collection("promociones").orderBy("orden","asc").get()
     .then(snap=>{
@@ -96,14 +93,16 @@ function loadAdminPromos(){
     });
 }
 
-/* ========== SAVE / UPDATE ========== */
 function guardarPromoAdmin(){
   const titulo=document.getElementById("promoAdminTitulo").value.trim();
   const descripcion=document.getElementById("promoAdminDesc").value.trim();
   const precio=document.getElementById("promoAdminPrecio").value.trim();
   const marca=document.getElementById("promoAdminMarca").value;
   const boton=document.getElementById("promoAdminBtn").value.trim();
-  const url=document.getElementById("promoAdminUrl").value.trim();
+  const accion=document.getElementById("promoAdminAccion").value;
+  const fechaInicio=document.getElementById("promoFechaInicio").value;
+  const fechaFin=document.getElementById("promoFechaFin").value;
+  const orden=Number(document.getElementById("promoAdminOrden").value)||0;
   const previewImg=document.getElementById("promoPreviewImg");
   const hasNewImage=previewImg&&previewImg.src&&previewImg.src.startsWith("data:");
 
@@ -112,12 +111,17 @@ function guardarPromoAdmin(){
   const saveBtn=document.getElementById("promoAdminSaveBtn");
   saveBtn.textContent="Guardando...";saveBtn.disabled=true;
 
+  const existing=promoEditId?promosAdmin.find(p=>p.id===promoEditId):null;
   const data={
     titulo,descripcion,precio,marca,
     boton:boton||"Ver Menú",
-    url:url||"#",
-    activo:promoEditId?(promosAdmin.find(p=>p.id===promoEditId)?.activo!==false):true,
-    orden:promoEditId?(promosAdmin.find(p=>p.id===promoEditId)?.orden||0):promosAdmin.length,
+    accion:accion||"carrito",
+    activo:existing?existing.activo!==false:true,
+    orden:orden||existing?.orden||promosAdmin.length,
+    clicks:existing?.clicks||0,
+    pedidosGenerados:existing?.pedidosGenerados||0,
+    fechaInicio:fechaInicio||null,
+    fechaFin:fechaFin||null,
     updatedAt:new Date().toISOString()
   };
 
@@ -129,19 +133,17 @@ function guardarPromoAdmin(){
     :firebase.firestore().collection("promociones").add({...data,createdAt:new Date().toISOString()});
 
   promise.then(()=>{
-    showPromoNotif("success",promoEditId?"Promoción actualizada":"Promoción creada");
+    showPromoNotif("success",promoEditId?"Actualizada":"Creada");
     limpiarPromoForm();
     loadAdminPromos();
   }).catch(err=>{
-    console.error("Error:",err);
     showPromoNotif("error","Error: "+err.message);
   }).finally(()=>{
-    saveBtn.textContent=promoEditId?"Actualizar":"Guardar Promoción";
+    saveBtn.textContent=promoEditId?"Actualizar":"Guardar";
     saveBtn.disabled=false;
   });
 }
 
-/* ========== EDIT ========== */
 function editarPromoAdmin(id){
   const p=promosAdmin.find(item=>item.id===id);
   if(!p) return;
@@ -151,7 +153,10 @@ function editarPromoAdmin(id){
   document.getElementById("promoAdminPrecio").value=p.precio||"";
   document.getElementById("promoAdminMarca").value=p.marca||"MEDIO URBANO";
   document.getElementById("promoAdminBtn").value=p.boton||"Ver Menú";
-  document.getElementById("promoAdminUrl").value=p.url||"";
+  document.getElementById("promoAdminAccion").value=p.accion||"carrito";
+  document.getElementById("promoFechaInicio").value=p.fechaInicio||"";
+  document.getElementById("promoFechaFin").value=p.fechaFin||"";
+  document.getElementById("promoAdminOrden").value=p.orden||0;
   if(p.imagen){
     document.getElementById("promoPreviewImg").src=p.imagen;
     document.getElementById("promoImgPreview").style.display="block";
@@ -160,9 +165,9 @@ function editarPromoAdmin(id){
   document.getElementById("promoFormTitle").textContent="Editar Promoción";
   document.getElementById("promoAdminSaveBtn").textContent="Actualizar";
   document.getElementById("promoAdminCancelBtn").style.display="inline-block";
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
-/* ========== DELETE ========== */
 function eliminarPromoAdmin(id){
   if(!confirm("¿Eliminar?")) return;
   firebase.firestore().collection("promociones").doc(id).delete()
@@ -170,7 +175,6 @@ function eliminarPromoAdmin(id){
     .catch(err=>showPromoNotif("error",err.message));
 }
 
-/* ========== TOGGLE ========== */
 function togglePromoActivo(id){
   const p=promosAdmin.find(item=>item.id===id);
   if(!p) return;
@@ -178,7 +182,6 @@ function togglePromoActivo(id){
     .then(()=>{showPromoNotif("success","Actualizado");loadAdminPromos();});
 }
 
-/* ========== MOVE ORDER ========== */
 function moverPromo(id,dir){
   const idx=promosAdmin.findIndex(p=>p.id===id);
   const swap=idx+dir;
@@ -190,7 +193,6 @@ function moverPromo(id,dir){
   batch.commit().then(()=>loadAdminPromos());
 }
 
-/* ========== TABLE ========== */
 function renderAdminPromosTable(){
   const tbody=document.getElementById("tablaAdminPromos");
   if(!tbody) return;
@@ -198,23 +200,24 @@ function renderAdminPromosTable(){
   promosAdmin.forEach(p=>{
     tbody.innerHTML+=`
       <tr>
-        <td>${p.imagen?`<img src="${p.imagen}" style="width:70px;height:50px;object-fit:cover;border-radius:8px;">`:'<span style="color:#666;">Sin imagen</span>'}</td>
+        <td>${p.imagen?`<img src="${p.imagen}" style="width:70px;height:50px;object-fit:cover;border-radius:8px;">`:'<span style="color:#666;">Sin</span>'}</td>
         <td>${p.titulo}</td>
         <td>${p.marca||"-"}</td>
         <td>${p.precio||"-"}</td>
+        <td style="font-size:12px;">${p.clicks||0}</td>
+        <td style="font-size:12px;">${p.pedidosGenerados||0}</td>
         <td><span style="color:${p.activo!==false?'var(--success)':'var(--danger)'};font-weight:700;">${p.activo!==false?'Activo':'Inactivo'}</span></td>
         <td style="white-space:nowrap;">
           <button onclick="moverPromo('${p.id}',-1)" style="padding:6px 10px;font-size:12px;">&#9650;</button>
           <button onclick="moverPromo('${p.id}',1)" style="padding:6px 10px;font-size:12px;">&#9660;</button>
           <button onclick="togglePromoActivo('${p.id}')" style="padding:6px 12px;font-size:12px;background:${p.activo!==false?'#ff9500':'var(--success)'};color:white;border:none;border-radius:8px;cursor:pointer;">${p.activo!==false?'Off':'On'}</button>
-          <button onclick="editarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--success);color:white;border:none;border-radius:8px;cursor:pointer;">Editar</button>
-          <button onclick="eliminarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;">Eliminar</button>
+          <button onclick="editarPromoAdmin('${p.id}')" class="edit-btn" style="padding:6px 12px;font-size:12px;border:none;border-radius:8px;cursor:pointer;">Editar</button>
+          <button onclick="eliminarPromoAdmin('${p.id}')" class="delete-btn" style="padding:6px 12px;font-size:12px;border:none;border-radius:8px;cursor:pointer;">Eliminar</button>
         </td>
       </tr>`;
   });
 }
 
-/* ========== STATS ========== */
 function updatePromoStats(){
   const activas=promosAdmin.filter(p=>p.activo!==false).length;
   const inactivas=promosAdmin.filter(p=>p.activo===false).length;
@@ -224,17 +227,19 @@ function updatePromoStats(){
   if(dash) dash.textContent=promosAdmin.length;
 }
 
-/* ========== CLEAR ========== */
 function limpiarPromoForm(){
   document.getElementById("promoAdminTitulo").value="";
   document.getElementById("promoAdminDesc").value="";
   document.getElementById("promoAdminPrecio").value="";
   document.getElementById("promoAdminMarca").value="MEDIO URBANO";
   document.getElementById("promoAdminBtn").value="Ver Menú";
-  document.getElementById("promoAdminUrl").value="";
+  document.getElementById("promoAdminAccion").value="carrito";
+  document.getElementById("promoFechaInicio").value="";
+  document.getElementById("promoFechaFin").value="";
+  document.getElementById("promoAdminOrden").value="0";
   limpiarPromoImagen();
   document.getElementById("promoFormTitle").textContent="Agregar Promoción";
-  document.getElementById("promoAdminSaveBtn").textContent="Guardar Promoción";
+  document.getElementById("promoAdminSaveBtn").textContent="Guardar";
   document.getElementById("promoAdminCancelBtn").style.display="none";
   promoEditId=null;
 }
