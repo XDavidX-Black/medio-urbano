@@ -70,11 +70,8 @@ carrusel dentro de la sección existente #promociones
         </div>
       `;
       slide.addEventListener("click",()=>{
-        if(p.url&&p.url!=="#"){
-          window.open(p.url,"_blank");
-        }else if(p.marca){
-          scrollToBrand(p.marca);
-        }
+        const msg="Hola! Me interesa la promoción: "+p.titulo+(p.precio?" - "+p.precio:"")+(p.marca?" ("+p.marca+")":"");
+        window.open("https://wa.me/529983852946?text="+encodeURIComponent(msg),"_blank");
       });
       track.appendChild(slide);
     });
