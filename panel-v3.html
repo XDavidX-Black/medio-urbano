@@ -103,19 +103,37 @@
     <!-- PROMOCIONES -->
     <div id="sec-promociones" class="dashboard-section" style="display:none;">
       <section>
-        <h2>Agregar Promoción</h2>
-        <input id="promoTitulo" placeholder="Título">
-        <input id="promoPrecio" placeholder="Precio">
-        <input id="promoImagen" placeholder="URL de imagen">
-        <button onclick="agregarPromo()">Agregar</button>
+        <h2>Agregar / Editar Promoción</h2>
+        <div id="promoStatsList" style="margin-bottom:20px;color:#ccc;font-size:14px;"></div>
+        <input id="promoAdminTitulo" placeholder="Título *" required>
+        <input id="promoAdminDesc" placeholder="Descripción">
+        <input id="promoAdminPrecio" placeholder="Precio (ej: $99 o Gratis)">
+        <select id="promoAdminMarca">
+          <option value="MEDIO URBANO">Medio Urbano (General)</option>
+          <option value="BURGERS">Burgers</option>
+          <option value="COCINA">Cocina</option>
+          <option value="PASTA">Pasta</option>
+          <option value="SALAD">Salad</option>
+        </select>
+        <input id="promoAdminBtn" placeholder="Texto del botón (Ver Menú / Ordenar Ahora)">
+        <input id="promoAdminUrl" placeholder="URL del botón (#, https://..., wa.me/...)">
+        <div style="margin-bottom:15px;">
+          <label style="display:block;margin-bottom:8px;color:#ccc;font-size:14px;">Imagen de fondo</label>
+          <input type="file" id="promoAdminFile" accept="image/*" onchange="previewPromoImage()" style="padding:12px;">
+          <img id="promoAdminPreview" style="max-width:300px;border-radius:12px;margin-top:10px;display:none;">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button id="promoAdminSaveBtn" onclick="guardarPromoAdmin()" style="flex:1;">Guardar Promoción</button>
+          <button id="promoAdminCancelBtn" onclick="limpiarPromoForm()" style="display:none;background:#666;color:white;">Cancelar</button>
+        </div>
       </section>
       <section>
-        <h2>Promociones</h2>
+        <h2>Promociones del Carrusel</h2>
         <table>
           <thead>
-            <tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Acción</th></tr>
+            <tr><th>Imagen</th><th>Título</th><th>Marca</th><th>Precio</th><th>Estado</th><th>Acciones</th></tr>
           </thead>
-          <tbody id="tablaPromos"></tbody>
+          <tbody id="tablaAdminPromos"></tbody>
         </table>
       </section>
     </div>
@@ -142,7 +160,12 @@
       </section>
     </div>
   </main>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/admin-v3.js"></script>
+  <script src="js/admin-promos.js"></script>
   <script src="js/dashboard.js"></script>
   <script>
     // NAV
@@ -157,9 +180,12 @@
     // STATS
     function updateStats(){
       const prods=JSON.parse(localStorage.getItem("productos"))||[];
-      const promos=JSON.parse(localStorage.getItem("promociones"))||[];
       document.getElementById("statProductos").textContent=prods.length;
-      document.getElementById("statPromos").textContent=promos.length;
+      if(typeof firebase!=="undefined"&&firebase.firestore){
+        firebase.firestore().collection("promociones").get().then(snap=>{
+          document.getElementById("statPromos").textContent=snap.size;
+        });
+      }
     }
 
     // CONFIG
@@ -170,6 +196,7 @@
     }
 
     updateStats();
+    initAdminPromos();
   </script>
   <style>
     aside li.active{background:var(--primary);color:#111;font-weight:700;}
