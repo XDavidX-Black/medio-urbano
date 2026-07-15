@@ -134,6 +134,7 @@ function guardarPromoAdmin(){
 
   promise.then(()=>{
     showPromoNotif("success",promoEditId?"Actualizada":"Creada");
+    if(typeof logAdminAction==="function") logAdminAction("promo","Promo "+(promoEditId?"editada":"creada"),titulo+" · "+marca);
     limpiarPromoForm();
     loadAdminPromos();
   }).catch(err=>{
@@ -170,16 +171,26 @@ function editarPromoAdmin(id){
 
 function eliminarPromoAdmin(id){
   if(!confirm("¿Eliminar?")) return;
+  const p=promosAdmin.find(x=>x.id===id);
   firebase.firestore().collection("promociones").doc(id).delete()
-    .then(()=>{showPromoNotif("success","Eliminada");loadAdminPromos();})
+    .then(()=>{
+      showPromoNotif("success","Eliminada");
+      if(typeof logAdminAction==="function") logAdminAction("promo","Promo eliminada",p?(p.titulo+" · "+p.marca):"");
+      loadAdminPromos();
+    })
     .catch(err=>showPromoNotif("error",err.message));
 }
 
 function togglePromoActivo(id){
   const p=promosAdmin.find(item=>item.id===id);
   if(!p) return;
-  firebase.firestore().collection("promociones").doc(id).update({activo:p.activo===false?true:false})
-    .then(()=>{showPromoNotif("success","Actualizado");loadAdminPromos();});
+  const nuevoActivo=p.activo===false?true:false;
+  firebase.firestore().collection("promociones").doc(id).update({activo:nuevoActivo})
+    .then(()=>{
+      showPromoNotif("success","Actualizado");
+      if(typeof logAdminAction==="function") logAdminAction("promo","Promo "+(nuevoActivo?"activada":"desactivada"),p.titulo);
+      loadAdminPromos();
+    });
 }
 
 function moverPromo(id,dir){

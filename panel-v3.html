@@ -28,6 +28,7 @@
       <li onclick="showSection('reportes')" data-section="reportes"><i class="fas fa-chart-bar"></i> Reportes</li>
       <li onclick="showSection('respaldos')" data-section="respaldos"><i class="fas fa-database"></i> Respaldos</li>
       <li onclick="showSection('seguridad')" data-section="seguridad"><i class="fas fa-shield-alt"></i> Seguridad</li>
+      <li onclick="showSection('logs')" data-section="logs"><i class="fas fa-clipboard-list"></i> Logs</li>
       <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</li>
     </ul>
   </aside>
@@ -458,6 +459,29 @@
             <div id="segActividad" style="max-height:300px;overflow-y:auto;"></div>
           </div>
         </div>
+      </section>
+    </div>
+    <!-- LOGS -->
+    <div id="sec-logs" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Registro de Actividad (Logs)</h2>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center;">
+          <select id="filtroLogTipo" onchange="renderLogs()" style="padding:10px;background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:white;font-size:13px;">
+            <option value="">Todos los tipos</option>
+            <option value="pedido">Pedidos</option>
+            <option value="producto">Productos</option>
+            <option value="promo">Promociones</option>
+            <option value="config">Configuración</option>
+            <option value="seguridad">Seguridad</option>
+            <option value="sistema">Sistema</option>
+          </select>
+          <input type="text" id="filtroLogBuscar" placeholder="Buscar en logs..." oninput="renderLogs()" style="padding:10px;background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:white;font-size:13px;flex:1;min-width:150px;">
+          <input type="date" id="filtroLogFecha" onchange="renderLogs()" style="padding:10px;background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:white;font-size:13px;">
+          <button onclick="limpiarLogs()" style="background:#c62828;color:white;padding:10px 16px;border:none;border-radius:10px;cursor:pointer;font-size:13px;"><i class="fas fa-trash"></i> Limpiar</button>
+          <button onclick="exportarLogs()" style="background:#333;color:white;padding:10px 16px;border:none;border-radius:10px;cursor:pointer;font-size:13px;"><i class="fas fa-download"></i> Exportar</button>
+        </div>
+        <div id="logsStats" style="color:#888;font-size:13px;margin-bottom:15px;"></div>
+        <div id="listaLogs" style="max-height:600px;overflow-y:auto;"></div>
       </section>
     </div>
   </main>

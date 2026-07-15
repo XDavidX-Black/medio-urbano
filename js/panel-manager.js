@@ -24,6 +24,7 @@ function initPanelManager(){
   loadSEO();
   loadPWA();
   recordAccess();
+  initLogs();
 }
 
 /* ====================================================
@@ -110,6 +111,7 @@ function cambiarEstadoPedido(id,estado){
       if(p) p.estado=estado;
       renderPedidosPanel();
       renderPedidosFull();
+      logAdminAction("pedido","Estado cambiado a "+estado,"Pedido "+(p?.cliente||"")+p?.telefono+(p?" · $"+(p.total||0).toFixed(0):"")+(p?" · "+(p.marca||""):""));
     });
 }
 
@@ -153,11 +155,13 @@ function closePedidoDetail(){
 function eliminarPedido(id){
   if(!confirm("¿Eliminar este pedido?")) return;
   if(typeof firebase==="undefined"||!firebase.firestore) return;
+  const p=allPedidos.find(x=>x.id===id);
   firebase.firestore().collection("pedidos").doc(id).delete()
     .then(()=>{
       allPedidos=allPedidos.filter(p=>p.id!==id);
       renderPedidosPanel();
       renderPedidosFull();
+      logAdminAction("pedido","Pedido eliminado",""+(p?.cliente||"")+" "+(p?.telefono||"")+" · $"+(p?.total||0).toFixed(0));
     });
 }
 
@@ -249,7 +253,7 @@ function guardarConfigGeneral(){
     updatedAt:new Date().toISOString()
   };
   firebase.firestore().collection("config").doc("general").set(data,{merge:true})
-    .then(()=>alert("Configuración guardada"))
+    .then(()=>{alert("Configuración guardada");logAdminAction("config","Configuración general actualizada","WhatsApp, envío, redes sociales");})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -302,7 +306,7 @@ function guardarHorarios(){
   });
   horariosData=data;
   firebase.firestore().collection("config").doc("horarios").set(data,{merge:true})
-    .then(()=>alert("Horarios guardados"))
+    .then(()=>{alert("Horarios guardados");logAdminAction("config","Horarios actualizados","Todos los días y marcas");})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -359,7 +363,7 @@ function eliminarZona(i){
 
 function saveZonas(){
   firebase.firestore().collection("config").doc("zonas").set({zonas:zonasData},{merge:true})
-    .then(()=>renderZonas())
+    .then(()=>{renderZonas();logAdminAction("config","Zonas de entrega actualizadas",zonasData.length+" zonas configuradas");})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -392,7 +396,7 @@ function guardarHero(){
     updatedAt:new Date().toISOString()
   };
   firebase.firestore().collection("config").doc("hero").set(data,{merge:true})
-    .then(()=>alert("Hero guardado"))
+    .then(()=>{alert("Hero guardado");logAdminAction("config","Hero actualizado","Título: "+data.titulo);})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -423,7 +427,7 @@ function guardarSEO(){
     updatedAt:new Date().toISOString()
   };
   firebase.firestore().collection("config").doc("seo").set(data,{merge:true})
-    .then(()=>alert("SEO guardado"))
+    .then(()=>{alert("SEO guardado");logAdminAction("config","SEO actualizado","Título: "+data.title);})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -456,7 +460,7 @@ function guardarPWA(){
     updatedAt:new Date().toISOString()
   };
   firebase.firestore().collection("config").doc("pwa").set(data,{merge:true})
-    .then(()=>alert("PWA guardada"))
+    .then(()=>{alert("PWA guardada");logAdminAction("config","PWA actualizada","Nombre: "+data.name);})
     .catch(e=>alert("Error: "+e.message));
 }
 
@@ -590,12 +594,7 @@ function recordAccess(){
   localStorage.setItem("adminLastAccess",now);
   const el=document.getElementById("segUltimoAcceso");
   if(el) el.value=new Date(now).toLocaleString();
-  const prev=localStorage.getItem("adminAccessLog")||"[]";
-  let log=JSON.parse(prev);
-  log.push({time:now,action:"Acceso al panel"});
-  if(log.length>50) log=log.slice(-50);
-  localStorage.setItem("adminAccessLog",JSON.stringify(log));
-  renderSeguridadActividad();
+  logAdminAction("sistema","Acceso al panel","Último acceso: "+new Date(now).toLocaleString());
 }
 
 function renderSeguridadActividad(){
@@ -617,9 +616,7 @@ function cambiarPassword(){
   if(nueva!==confirm){alert("Las contraseñas no coinciden");return;}
   if(nueva.length<4){alert("Mínimo 4 caracteres");return;}
   localStorage.setItem("adminPassword",nueva);
-  const log=JSON.parse(localStorage.getItem("adminAccessLog")||"[]");
-  log.push({time:new Date().toISOString(),action:"Contraseña cambiada"});
-  localStorage.setItem("adminAccessLog",JSON.stringify(log));
+  logAdminAction("seguridad","Contraseña cambiada","Acceso seguro verificado");
   alert("Contraseña cambiada. Usa la nueva contraseña la próxima vez.");
 }
 
@@ -635,6 +632,116 @@ function guardarBrandIdentity(){
     updatedAt:new Date().toISOString()
   };
   firebase.firestore().collection("config").doc("brandIdentity").set(data,{merge:true})
-    .then(()=>alert("Identidad guardada"))
+    .then(()=>{alert("Identidad guardada");logAdminAction("config","Identidad de marca actualizada","Slogan: "+data.slogan);})
     .catch(e=>alert("Error: "+e.message));
+}
+
+/* ====================================================
+   LOGS - REGISTRO DE ACTIVIDAD
+   ==================================================== */
+let allLogs=[];
+
+function initLogs(){
+  loadLogs();
+}
+
+function logAdminAction(tipo,accion,detalle){
+  if(typeof firebase==="undefined"||!firebase.firestore) return;
+  const entry={
+    tipo:tipo||"sistema",
+    accion:accion||"",
+    detalle:detalle||"",
+    usuario:"admin",
+    fecha:new Date().toISOString()
+  };
+  firebase.firestore().collection("logs").add(entry)
+    .then(()=>{
+      allLogs.unshift(entry);
+      if(allLogs.length>500) allLogs=allLogs.slice(0,500);
+      renderLogs();
+    }).catch(()=>{});
+}
+
+function loadLogs(){
+  if(typeof firebase==="undefined"||!firebase.firestore) return;
+  firebase.firestore().collection("logs").orderBy("fecha","desc").limit(500).get()
+    .then(snap=>{
+      allLogs=[];
+      snap.forEach(doc=>allLogs.push({id:doc.id,...doc.data()}));
+      renderLogs();
+    }).catch(()=>{});
+}
+
+function renderLogs(){
+  const container=document.getElementById("listaLogs");
+  const statsEl=document.getElementById("logsStats");
+  if(!container) return;
+  const filtroTipo=document.getElementById("filtroLogTipo")?.value||"";
+  const buscar=(document.getElementById("filtroLogBuscar")?.value||"").toLowerCase();
+  const filtroFecha=document.getElementById("filtroLogFecha")?.value||"";
+  let filtered=[...allLogs];
+  if(filtroTipo) filtered=filtered.filter(l=>l.tipo===filtroTipo);
+  if(buscar) filtered=filtered.filter(l=>(l.accion||"").toLowerCase().includes(buscar)||(l.detalle||"").toLowerCase().includes(buscar));
+  if(filtroFecha) filtered=filtered.filter(l=>l.fecha&&l.fecha.startsWith(filtroFecha));
+  if(statsEl){
+    const porTipo={};
+    allLogs.forEach(l=>{porTipo[l.tipo]=(porTipo[l.tipo]||0)+1;});
+    statsEl.innerHTML=`Total: <strong>${allLogs.length}</strong> | Filtrados: <strong>${filtered.length}</strong> | Por tipo: ${Object.entries(porTipo).map(([t,c])=>`<span style="color:${tipoColor(t)}">${t}: ${c}</span>`).join(" · ")}`;
+  }
+  if(!filtered.length){container.innerHTML='<p style="color:#666;text-align:center;padding:30px;">Sin registros</p>';return;}
+  container.innerHTML="";
+  filtered.forEach(l=>{
+    const f=l.fecha?new Date(l.fecha):new Date();
+    const icon=tipoIcon(l.tipo);
+    const color=tipoColor(l.tipo);
+    container.innerHTML+=`
+      <div style="display:flex;gap:14px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.05);transition:background .2s;" onmouseover="this.style.background='rgba(255,255,255,.03)'" onmouseout="this.style.background='transparent'">
+        <div style="width:36px;height:36px;border-radius:10px;background:${color}22;color:${color};display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px;">
+          <i class="fas fa-${icon}"></i>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+            <strong style="font-size:13px;color:#e0e0e0;">${l.accion||"Sin acción"}</strong>
+            <span style="font-size:11px;color:#666;white-space:nowrap;">${f.toLocaleDateString()} ${f.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'})}</span>
+          </div>
+          <div style="font-size:12px;color:#888;margin-top:3px;">${l.detalle||""}</div>
+          <div style="margin-top:5px;"><span style="display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;background:${color}22;color:${color};">${l.tipo||"sistema"}</span></div>
+        </div>
+      </div>`;
+  });
+}
+
+function tipoIcon(tipo){
+  const map={pedido:"receipt",producto:"utensils",promo:"tag",config:"cog",seguridad:"shield-alt",sistema:"power-off"};
+  return map[tipo]||"info-circle";
+}
+
+function tipoColor(tipo){
+  const map={pedido:"#2196f3",producto:"#ff9800",promo:"#e91e63",config:"#9c27b0",seguridad:"#ff3b30",sistema:"#607d8b"};
+  return map[tipo]||"#888";
+}
+
+function limpiarLogs(){
+  if(!confirm("¿Eliminar TODOS los logs? Esta acción no se puede deshacer.")) return;
+  if(typeof firebase==="undefined"||!firebase.firestore) return;
+  firebase.firestore().collection("logs").get()
+    .then(snap=>{
+      const batch=firebase.firestore().batch();
+      snap.forEach(doc=>batch.delete(doc.ref));
+      return batch.commit();
+    })
+    .then(()=>{allLogs=[];renderLogs();logAdminAction("sistema","Logs limpiados","Todos los registros eliminados");})
+    .catch(e=>alert("Error: "+e.message));
+}
+
+function exportarLogs(){
+  let csv="Fecha,Tipo,Acción,Detalle,Usuario\n";
+  allLogs.forEach(l=>{
+    csv+=`"${l.fecha||""}","${l.tipo||""}","${(l.accion||"").replace(/"/g,'""')}","${(l.detalle||"").replace(/"/g,'""')}","${l.usuario||""}"\n`;
+  });
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download="logs-"+new Date().toISOString().split("T")[0]+".csv";a.click();
+  URL.revokeObjectURL(url);
+  logAdminAction("sistema","Logs exportados",allLogs.length+" registros");
 }

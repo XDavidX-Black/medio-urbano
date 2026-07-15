@@ -141,8 +141,10 @@ function agregarProducto(){
     editProductId=null;
     document.getElementById("prodFormTitle").textContent="Agregar Producto";
     document.getElementById("prodSaveBtn").textContent="Guardar";
+    if(typeof logAdminAction==="function") logAdminAction("producto","Producto editado",nombre+" · $"+precio+" · "+categoria);
   }else{
     productos.push({id:Date.now(),nombre,precio,descripcion,categoria,imagen,orden,estado,destacado,extras:currentExtras});
+    if(typeof logAdminAction==="function") logAdminAction("producto","Producto agregado",nombre+" · $"+precio+" · "+categoria);
   }
   guardarProductos();
   mostrarProductos();
@@ -166,9 +168,11 @@ function limpiarFormulario(){
 
 function eliminarProducto(id){
   if(!confirm("¿Eliminar producto?")) return;
+  const p=productos.find(x=>x.id===id);
   productos=productos.filter(p=>p.id!==id);
   guardarProductos();
   mostrarProductos();
+  if(typeof logAdminAction==="function") logAdminAction("producto","Producto eliminado",p?(p.nombre+" · "+p.categoria):"id:"+id);
 }
 
 function editarProducto(id){
