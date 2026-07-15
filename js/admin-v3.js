@@ -160,6 +160,43 @@ function mostrarProductos(){
   });
 }
 
+/* PROMOCIONES */
+let promociones=JSON.parse(localStorage.getItem("promociones"))||[];
+
+function agregarPromo(){
+  const titulo=document.getElementById("promoTitulo").value.trim();
+  const precio=document.getElementById("promoPrecio").value.trim();
+  const imagen=document.getElementById("promoImagen").value.trim();
+  if(!titulo){alert("Ingresa el título");return;}
+  promociones.push({id:Date.now(),titulo,precio,imagen});
+  localStorage.setItem("promociones",JSON.stringify(promociones));
+  window.dispatchEvent(new Event("promosUpdated"));
+  mostrarPromos();
+}
+
+function mostrarPromos(){
+  const lista=document.getElementById("tablaPromos");
+  if(!lista) return;
+  lista.innerHTML="";
+  promociones.forEach(p=>{
+    lista.innerHTML+=`
+      <tr>
+        <td><img src="${p.imagen||''}" width="70" style="border-radius:8px;"></td>
+        <td>${p.titulo}</td>
+        <td>$${p.precio}</td>
+        <td><button onclick="eliminarPromo(${p.id})" class="delete-btn">Eliminar</button></td>
+      </tr>`;
+  });
+}
+
+function eliminarPromo(id){
+  promociones=promociones.filter(p=>p.id!==id);
+  localStorage.setItem("promociones",JSON.stringify(promociones));
+  window.dispatchEvent(new Event("promosUpdated"));
+  mostrarPromos();
+}
+
 window.onload=()=>{
   mostrarProductos();
+  mostrarPromos();
 };
