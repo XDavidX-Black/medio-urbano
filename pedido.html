@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Finalizar Pedido | Medio Urbano</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"/>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/themes.css">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:var(--font-body);background:var(--dark);color:#fff;min-height:100vh;}
+    header{padding:20px 40px;background:rgba(8,8,8,.95);border-bottom:1px solid rgba(255,255,255,.06);}
+    header .container{display:flex;align-items:center;justify-content:space-between;}
+    .logo img{height:55px;}
+    .pedido-page{min-height:calc(100vh - 100px);display:flex;align-items:center;justify-content:center;padding:60px 20px;}
+    .pedido-box{
+      width:100%;max-width:500px;background:#151515;
+      border-radius:25px;padding:50px 40px;
+      box-shadow:0 25px 50px rgba(0,0,0,.45);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    .pedido-box h1{
+      font-family:var(--font-title);font-size:48px;
+      color:var(--primary);margin-bottom:10px;text-align:center;
+    }
+    .pedido-box>p{text-align:center;color:#aaa;margin-bottom:35px;}
+    .pedido-box input,.pedido-box textarea{
+      width:100%;padding:16px;margin-bottom:15px;
+      background:#1f1f1f;border:1px solid rgba(255,255,255,.08);
+      border-radius:14px;color:white;font-size:15px;
+      font-family:var(--font-body);outline:none;transition:.3s;
+    }
+    .pedido-box input:focus,.pedido-box textarea:focus{border-color:var(--primary);}
+    .pedido-box textarea{resize:vertical;min-height:100px;}
+    .pedido-box button{
+      width:100%;padding:18px;margin-top:10px;
+      font-size:16px;
+    }
+    .pedido-box .btn-primary{
+      width:100%;padding:18px;border:none;border-radius:50px;
+      background:var(--primary);color:#111;font-size:16px;
+      font-weight:700;cursor:pointer;transition:.35s;
+      font-family:var(--font-body);
+    }
+    .pedido-box .btn-primary:hover{background:#ffe46d;transform:translateY(-4px);}
+    .pedido-summary{margin-bottom:30px;}
+    .pedido-summary h3{font-family:var(--font-title);font-size:24px;color:var(--primary);margin-bottom:15px;}
+    .pedido-summary .item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+    .pedido-summary .total{text-align:right;font-size:20px;font-weight:700;color:var(--primary);margin-top:15px;}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="test.html" class="logo"><img src="img/logo-marca.png" alt="Medio Urbano"></a>
+    </div>
+  </header>
+  <section class="pedido-page">
+    <div class="container">
+      <div class="pedido-box">
+        <h1>Finalizar Pedido</h1>
+        <p>Completa tus datos para enviar tu pedido.</p>
+        <div class="pedido-summary" id="pedidoSummary"></div>
+        <form id="pedidoForm">
+          <input type="text" id="cliente" placeholder="Nombre completo" required>
+          <input type="tel" id="telefono" placeholder="Teléfono" required>
+          <input type="text" id="direccion" placeholder="Dirección" required>
+          <textarea id="comentarios" placeholder="Comentarios adicionales"></textarea>
+          <button type="submit" class="btn-primary">Enviar Pedido</button>
+        </form>
+      </div>
+    </div>
+  </section>
+  <script>
+    let carrito=JSON.parse(localStorage.getItem("medioUrbanoCart"))||[];
+
+    function renderSummary(){
+      const summary=document.getElementById("pedidoSummary");
+      if(!carrito.length){summary.innerHTML="<p style='color:#666;text-align:center;'>Carrito vacío</p>";return;}
+      let html="<h3>Tu Pedido</h3>";
+      let total=0;
+      carrito.forEach(item=>{
+        const sub=item.precio*item.cantidad;
+        total+=sub;
+        html+=`<div class="item"><span>${item.nombre} x${item.cantidad}</span><span>$${sub}</span></div>`;
+      });
+      html+=`<div class="total">Total: $${total.toFixed(2)}</div>`;
+      summary.innerHTML=html;
+    }
+
+    function calcularTotalPedido(lista){
+      return lista.reduce((sum,item)=>sum+item.precio*item.cantidad,0);
+    }
+
+    function crearPedidoLocal(cliente,telefono,direccion,carrito){
+      const pedido={id:Date.now(),cliente,telefono,direccion,productos:carrito,total:calcularTotalPedido(carrito),estado:"Pendiente",fecha:new Date().toLocaleString()};
+      let pedidos=JSON.parse(localStorage.getItem("pedidos"))||[];
+      pedidos.push(pedido);
+      localStorage.setItem("pedidos",JSON.stringify(pedidos));
+      return pedido;
+    }
+
+    document.getElementById("pedidoForm").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const pedido=crearPedidoLocal(
+        document.getElementById("cliente").value,
+        document.getElementById("telefono").value,
+        document.getElementById("direccion").value,
+        carrito
+      );
+      const numero="529983852946";
+      let mensaje="\ud83c\udf54 *PEDIDO MEDIO URBANO*%0A%0A";
+      carrito.forEach(item=>{mensaje+=`\u2022 ${item.nombre} x${item.cantidad} - $${item.precio*item.cantidad}%0A`;});
+      mensaje+="%0A\ud83d\udcb0 Total: $"+calcularTotalPedido(carrito).toFixed(2);
+      if(document.getElementById("comentarios").value){
+        mensaje+="%0A%0A\ud83d\udcdd "+document.getElementById("comentarios").value;
+      }
+      localStorage.removeItem("medioUrbanoCart");
+      window.open(`https://wa.me/${numero}?text=${mensaje}`,"_blank");
+      setTimeout(()=>{window.location="test.html";},1500);
+    });
+
+    renderSummary();
+  </script>
+</body>
+</html>

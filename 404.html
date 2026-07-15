@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>404 | Página no encontrada</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css">
+  <style>
+    body{
+      margin:0;display:flex;align-items:center;justify-content:center;
+      min-height:100vh;
+      background:linear-gradient(rgba(0,0,0,.85),rgba(0,0,0,.90)),url("img/background.webp");
+      background-size:cover;background-position:center;
+      font-family:'Montserrat',sans-serif;color:white;text-align:center;overflow:hidden;
+    }
+    .error-box{max-width:700px;padding:50px;}
+    .error-box h1{
+      font-size:180px;font-family:'Bebas Neue',sans-serif;color:#FFD028;
+      line-height:1;margin:0;text-shadow:0 0 30px rgba(255,208,40,.35);
+    }
+    .error-box h2{font-size:42px;margin:15px 0;}
+    .error-box p{font-size:20px;color:#d4d4d4;margin-bottom:35px;}
+    .btn-home{
+      display:inline-block;padding:18px 45px;background:#FFD028;
+      border-radius:50px;font-weight:700;color:#111;transition:.35s;text-decoration:none;
+    }
+    .btn-home:hover{transform:translateY(-6px);box-shadow:0 15px 35px rgba(255,208,40,.35);}
+    .error-icon{font-size:90px;margin-bottom:20px;color:#FFD028;animation:float 3s infinite;}
+    @keyframes float{0%{transform:translateY(0);}50%{transform:translateY(-15px);}100%{transform:translateY(0);}}
+  </style>
+</head>
+<body>
+  <div class="error-box">
+    <div class="error-icon"><i class="fas fa-burger"></i></div>
+    <h1>404</h1>
+    <h2>Página no encontrada</h2>
+    <p>Parece que este platillo aún no está en el menú.</p>
+    <a href="test.html" class="btn-home">Volver al inicio</a>
+  </div>
+</body>
+</html>

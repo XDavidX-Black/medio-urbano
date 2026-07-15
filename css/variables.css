@@ -1,0 +1,89 @@
+:root{
+  /* COLORES PRINCIPALES */
+  --primary:#FFD028;
+  --secondary:#49C26B;
+  --accent:#D62828;
+  --warning:#FF9800;
+  --white:#FFFFFF;
+  --black:#000000;
+  --dark:#080808;
+  --dark-100:#101010;
+  --dark-200:#181818;
+  --dark-300:#222222;
+  --dark-400:#2B2B2B;
+  --gray:#CFCFCF;
+  --gray-light:#EFEFEF;
+  --gray-dark:#7B7B7B;
+
+  /* GRADIENTES */
+  --gradient-yellow:linear-gradient(135deg,#FFD028,#FF9800);
+  --gradient-green:linear-gradient(135deg,#3DBB68,#1E8E3E);
+  --gradient-red:linear-gradient(135deg,#D62828,#8E1212);
+  --gradient-dark:linear-gradient(180deg,#181818,#080808);
+  --gradient-card:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));
+
+  /* TIPOGRAFIA */
+  --font-title:'Bebas Neue',sans-serif;
+  --font-body:'Montserrat',sans-serif;
+
+  /* ESPACIADOS */
+  --space-xs:8px;
+  --space-sm:12px;
+  --space-md:20px;
+  --space-lg:30px;
+  --space-xl:50px;
+  --space-2xl:80px;
+
+  /* RADIOS */
+  --radius-sm:10px;
+  --radius-md:18px;
+  --radius-lg:25px;
+  --radius-xl:35px;
+  --radius-round:999px;
+
+  /* SOMBRAS */
+  --shadow-sm:0 8px 20px rgba(0,0,0,.18);
+  --shadow-md:0 15px 35px rgba(0,0,0,.28);
+  --shadow-lg:0 30px 60px rgba(0,0,0,.42);
+  --shadow-yellow:0 0 35px rgba(255,208,40,.35);
+  --shadow-green:0 0 35px rgba(61,187,104,.35);
+
+  /* TRANSICIONES */
+  --fast:.25s;
+  --normal:.35s;
+  --slow:.60s;
+
+  /* HEADER */
+  --header-height:90px;
+
+  /* Z INDEX */
+  --z-loader:99999;
+  --z-cart:9999;
+  --z-overlay:9998;
+  --z-header:500;
+  --z-floating:999;
+
+  /* BOTONES */
+  --btn-height:55px;
+  --btn-radius:50px;
+
+  /* CARDS */
+  --card-bg:rgba(255,255,255,.05);
+  --card-border:rgba(255,255,255,.08);
+  --card-hover:rgba(255,255,255,.08);
+  --blur:blur(12px);
+
+  /* ANIMACIONES */
+  --rotate:4deg;
+  --scale:1.05;
+  --lift:-8px;
+
+  /* WHATSAPP */
+  --whatsapp:#25D366;
+
+  /* MARCAS */
+  --cocina:#5B8C2A;
+  --salad:#34C759;
+  --burgers:#FFD028;
+  --pasta:#D62828;
+}

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medio Urbano | Pedidos</title>
+  <meta name="description" content="Medio Urbano - Cocina, Salad, Burgers y Pasta. Ordena tu comida favorita y recibela en tu domicilio.">
+  <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-content">
+      <img src="img/logo-marca.png" alt="Medio Urbano" class="logo-img">
+      <button class="btn-back" id="btnBack" onclick="goHome()">← Volver</button>
+    </div>
+  </header>
+
+  <!-- LANDING PAGE -->
+  <section class="landing landing-with-bg" id="landingPage">
+    <img src="img/logo-marca.png" alt="Medio Urbano" class="landing-logo fade-in">
+
+    <div class="negocios-grid">
+      <div class="negocio-card fade-in">
+        <img src="img/logo-cocina.png" alt="Medio Urbano Cocina" class="negocio-logo">
+        <h2 class="negocio-name">COCINA</h2>
+        <p class="negocio-desc">Menu del dia con platillos que cambian. Comida casera hecha con amor.</p>
+        <div class="negocio-status" id="statusCocina"></div>
+        <div class="negocio-horario-text" id="horarioTextoCocina"></div>
+        <div class="negocio-buttons">
+          <span class="negocio-tag" onclick="openMenu('cocina')">Ver Menu</span>
+        </div>
+      </div>
+
+      <div class="negocio-card fade-in">
+        <img src="img/logo-salad.png" alt="Medio Urbano Salad" class="negocio-logo">
+        <h2 class="negocio-name">SALAD</h2>
+        <p class="negocio-desc">Ensaladas frescas y saludables. Sabor y nutricion en cada bocado.</p>
+        <div class="negocio-status" id="statusSalad"></div>
+        <div class="negocio-horario-text" id="horarioTextoSalad"></div>
+        <div class="negocio-buttons">
+          <span class="negocio-tag" onclick="openMenu('salad')">Ver Menu</span>
+        </div>
+      </div>
+
+      <div class="negocio-card fade-in">
+        <img src="img/logo-burgers.png" alt="Medio Urbano Burgers" class="negocio-logo">
+        <h2 class="negocio-name">BURGERS</h2>
+        <p class="negocio-desc">Hamburguesas, hot dogs y papas fritas. Sabor que enamora.</p>
+        <div class="negocio-status" id="statusBurgers"></div>
+        <div class="negocio-horario-text" id="horarioTextoBurgers"></div>
+        <div class="negocio-buttons">
+          <span class="negocio-tag" onclick="openMenu('burgers')">Ver Menu</span>
+        </div>
+      </div>
+
+      <div class="negocio-card fade-in">
+        <img src="img/logo-pasta.png" alt="Medio Urbano Pasta" class="negocio-logo">
+        <h2 class="negocio-name">PASTA</h2>
+        <p class="negocio-desc">Pasta boloñesa, pesto y alfredo. Sabor italiano hecho en casa.</p>
+        <div class="negocio-status" id="statusPasta"></div>
+        <div class="negocio-horario-text" id="horarioTextoPasta"></div>
+        <div class="negocio-buttons">
+          <span class="negocio-tag" onclick="openMenu('pasta')">Ver Menu</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MENU COCINA -->
+  <section class="menu-page section-cocina" id="menuCocina">
+    <div class="cerrado-banner" id="cerradoBannerCocina" style="display:none;">
+      <span class="cerrado-banner-icon">🔒</span>
+      <span class="cerrado-banner-text"></span>
+      <span class="cerrado-banner-sub">Puedes ver el menu, pero no ordenar hasta la apertura</span>
+    </div>
+    <div class="menu-header">
+      <img src="img/logo-cocina.png" alt="Medio Urbano Cocina" class="menu-logo">
+      <h1>MEDIO URBANO <span>COCINA</span></h1>
+      <p class="tagline">"COMO EN CASA, SIN COCINAR"</p>
+      <p>Menu del dia - Ordena y recibe en tu domicilio</p>
+    </div>
+    <div class="menu-categorias" id="categoriasCocina"></div>
+    <div class="menu-grid" id="gridCocina"></div>
+  </section>
+
+  <!-- MENU SALAD -->
+  <section class="menu-page section-salad" id="menuSalad">
+    <div class="cerrado-banner" id="cerradoBannerSalad" style="display:none;">
+      <span class="cerrado-banner-icon">🔒</span>
+      <span class="cerrado-banner-text"></span>
+      <span class="cerrado-banner-sub">Puedes ver el menu, pero no ordenar hasta la apertura</span>
+    </div>
+    <div class="menu-header">
+      <img src="img/logo-salad.png" alt="Medio Urbano Salad" class="menu-logo">
+      <h1>MEDIO URBANO <span>SALAD</span></h1>
+      <p class="tagline">"FRESCAS Y SALUDABLES"</p>
+      <p>Ensaladas frescas - Ordena y recibe en tu domicilio</p>
+    </div>
+    <div class="menu-categorias" id="categoriasSalad"></div>
+    <div class="menu-grid" id="gridSalad"></div>
+  </section>
+
+  <!-- MENU BURGERS -->
+  <section class="menu-page section-burgers" id="menuBurgers">
+    <div class="cerrado-banner" id="cerradoBannerBurgers" style="display:none;">
+      <span class="cerrado-banner-icon">🔒</span>
+      <span class="cerrado-banner-text"></span>
+      <span class="cerrado-banner-sub">Puedes ver el menu, pero no ordenar hasta la apertura</span>
+    </div>
+    <div class="menu-header">
+      <img src="img/logo-burgers.png" alt="Medio Urbano Burgers" class="menu-logo">
+      <h1>MEDIO URBANO <span>BURGERS</span></h1>
+      <p class="tagline">"COMO EN CASA, SIN COCINAR"</p>
+      <p>Hamburguesas, Hot Dogs y Papas - Ordena y recibe en tu domicilio</p>
+    </div>
+    <div class="menu-categorias" id="categoriasBurgers"></div>
+    <div class="menu-grid" id="gridBurgers"></div>
+  </section>
+
+  <!-- MENU PASTA -->
+  <section class="menu-page section-pasta" id="menuPasta">
+    <div class="cerrado-banner" id="cerradoBannerPasta" style="display:none;">
+      <span class="cerrado-banner-icon">🔒</span>
+      <span class="cerrado-banner-text"></span>
+      <span class="cerrado-banner-sub">Puedes ver el menu, pero no ordenar hasta la apertura</span>
+    </div>
+    <div class="menu-header">
+      <img src="img/logo-pasta.png" alt="Medio Urbano Pasta" class="menu-logo">
+      <h1>MEDIO URBANO <span>PASTA</span></h1>
+      <p class="tagline">"SABOR ITALIANO"</p>
+      <p>Pasta fresca - Ordena y recibe en tu domicilio</p>
+    </div>
+    <div class="menu-categorias" id="categoriasPasta"></div>
+    <div class="menu-grid" id="gridPasta"></div>
+  </section>
+
+  <!-- MODAL CERRADO -->
+  <div class="modal-overlay" id="modalCerrado">
+    <div class="modal modal-cerrado">
+      <div class="modal-header">
+        <h2>🕐 HORARIO</h2>
+        <button class="btn-close" onclick="closeCerrado()">&times;</button>
+      </div>
+      <div class="modal-body cerrado-body">
+        <div class="cerrado-icon">🔒</div>
+        <h3 class="cerrado-negocio" id="cerradoNegocio"></h3>
+        <p class="cerrado-texto">Este negocio esta cerrado en este momento</p>
+        <div class="cerrado-horario" id="cerradoHorario"></div>
+        <div class="cerrado-proximo" id="cerradoProximo"></div>
+        <button class="btn-cerrado-volver" onclick="closeCerrado()">Volver al Inicio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CARRITO FLOATING -->
+  <div class="carrito-float" id="carritoFloat" onclick="openCarrito()">
+    🛒 Ver pedido
+    <span class="carrito-badge" id="carritoBadge">0</span>
+  </div>
+
+  <!-- MODAL CARRITO -->
+  <div class="modal-overlay" id="modalCarrito">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>🛒 TU PEDIDO</h2>
+        <button class="btn-close" onclick="closeCarrito()">&times;</button>
+      </div>
+      <div class="modal-body" id="carritoBody"></div>
+      <div class="carrito-total" id="carritoTotal" style="display:none;">
+        <span class="carrito-total-label">Total</span>
+        <span class="carrito-total-amount" id="totalAmount">$0</span>
+      </div>
+      <div class="formulario" id="formularioSection" style="display:none;">
+        <h3>📋 TUS DATOS</h3>
+        <div class="form-group">
+          <label>Nombre completo</label>
+          <input type="text" id="inputNombre" placeholder="Tu nombre">
+        </div>
+        <div class="form-group">
+          <label>Telefono</label>
+          <input type="tel" id="inputTelefono" placeholder="Tu numero de telefono">
+        </div>
+        <div class="form-group">
+          <label>Direccion de entrega</label>
+          <textarea id="inputDireccion" placeholder="Calle, numero, colonia, referencias..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Metodo de pago</label>
+          <select id="inputPago">
+            <option value="">Selecciona...</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Tarjeta de credito/debito">Tarjeta de credito/debito</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Notas adicionales (opcional)</label>
+          <textarea id="inputNotas" placeholder="Sin cebolla, poco picante, etc."></textarea>
+        </div>
+        <button class="btn-enviar" onclick="enviarWhatsApp()">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar Pedido por WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="footer" id="footer">
+    <img src="img/logo-marca.png" alt="Medio Urbano" class="logo-img-small" style="margin-bottom: 12px;">
+    <p class="tagline">"COMO EN CASA, SIN COCINAR"</p>
+    <p style="margin-top: 8px;">Medio Urbano &copy; 2026 - Ordena a domicilio por WhatsApp</p>
+    <a href="admin.html" style="color: var(--text-muted); font-size: 11px; text-decoration: none; opacity: 0.3; margin-top: 8px; display: inline-block;">Admin</a>
+  </footer>
+
+  <!-- SCRIPTS -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/menu-cocina.js"></script>
+  <script src="js/menu-salad.js"></script>
+  <script src="js/menu-burgers.js"></script>
+  <script src="js/menu-pasta.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

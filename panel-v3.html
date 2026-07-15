@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Dashboard | Medio Urbano</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css"/>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/admin-v3.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <aside>
+    <h1>MEDIO URBANO</h1>
+    <ul>
+      <li onclick="showSection('dashboard')" class="active" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</li>
+      <li onclick="showSection('productos')" data-section="productos"><i class="fas fa-utensils"></i> Productos</li>
+      <li onclick="showSection('promociones')" data-section="promociones"><i class="fas fa-tag"></i> Promociones</li>
+      <li onclick="showSection('pedidos')" data-section="pedidos"><i class="fas fa-receipt"></i> Pedidos</li>
+      <li onclick="showSection('config')" data-section="config"><i class="fas fa-cog"></i> Configuración</li>
+      <li onclick="logout()"><i class="fas fa-sign-out-alt"></i> Cerrar sesión</li>
+    </ul>
+  </aside>
+  <main>
+    <!-- DASHBOARD -->
+    <div id="sec-dashboard" class="dashboard-section">
+      <div class="dashboard">
+        <div class="dashboard-cards">
+          <div class="card">
+            <div><h2 id="statProductos">0</h2><span>Productos</span></div>
+            <i class="fas fa-utensils"></i>
+          </div>
+          <div class="card">
+            <div><h2 id="statPromos">0</h2><span>Promociones</span></div>
+            <i class="fas fa-tag"></i>
+          </div>
+          <div class="card">
+            <div><h2 id="statPedidos">0</h2><span>Pedidos Hoy</span></div>
+            <i class="fas fa-receipt"></i>
+          </div>
+          <div class="card">
+            <div><h2 id="statIngresos">$0</h2><span>Ingresos</span></div>
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+        </div>
+        <div class="dashboard-grid">
+          <div class="orders">
+            <h2>Pedidos Recientes</h2>
+            <div id="listaPedidos">
+              <p style="color:#666;text-align:center;padding:30px;">Sin pedidos aún</p>
+            </div>
+          </div>
+          <div class="activity">
+            <h2>Actividad</h2>
+            <ul id="listaActividad">
+              <li><i class="fas fa-circle"></i><div><strong>Sistema iniciado</strong><br><small>Ahora</small></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="chart">
+          <p><i class="fas fa-chart-line" style="font-size:40px;display:block;margin-bottom:15px;"></i>Gráficas próximamente</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div id="sec-productos" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Agregar Producto</h2>
+        <input id="nombre" placeholder="Nombre">
+        <input id="precio" placeholder="Precio (dejar en 0 para ocultar)">
+        <div class="upload-area" id="uploadArea">
+          <i class="fas fa-cloud-upload-alt"></i>
+          <p>Arrastra una imagen o haz clic para seleccionar</p>
+          <input type="file" id="imagenFile" accept="image/*" style="display:none;">
+        </div>
+        <div id="imagenPreview" style="display:none;margin:15px 0;">
+          <img id="previewImg" style="max-width:200px;border-radius:12px;">
+          <button type="button" onclick="limpiarImagen()" style="margin-left:10px;background:#c62828;color:white;padding:8px 16px;">Quitar</button>
+        </div>
+        <input type="hidden" id="imagen" value="">
+        <textarea id="descripcion" placeholder="Descripción"></textarea>
+        <select id="categoria">
+          <option value="cocina">Cocina</option>
+          <option value="salad">Salad</option>
+          <option value="burgers">Burgers</option>
+          <option value="pasta">Pasta</option>
+        </select>
+        <button onclick="agregarProducto()">Guardar</button>
+      </section>
+      <section>
+        <h2>Productos</h2>
+        <table>
+          <thead>
+            <tr><th>Imagen</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Acciones</th></tr>
+          </thead>
+          <tbody id="tablaProductos"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- PROMOCIONES -->
+    <div id="sec-promociones" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Agregar Promoción</h2>
+        <input id="promoTitulo" placeholder="Título">
+        <input id="promoPrecio" placeholder="Precio">
+        <input id="promoImagen" placeholder="URL de imagen">
+        <button onclick="agregarPromo()">Agregar</button>
+      </section>
+      <section>
+        <h2>Promociones</h2>
+        <table>
+          <thead>
+            <tr><th>Imagen</th><th>Título</th><th>Precio</th><th>Acción</th></tr>
+          </thead>
+          <tbody id="tablaPromos"></tbody>
+        </table>
+      </section>
+    </div>
+
+    <!-- PEDIDOS -->
+    <div id="sec-pedidos" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Todos los Pedidos</h2>
+        <div id="listaPedidosFull">
+          <p style="color:#666;text-align:center;padding:30px;">Sin pedidos aún</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- CONFIGURACION -->
+    <div id="sec-config" class="dashboard-section" style="display:none;">
+      <section>
+        <h2>Configuración</h2>
+        <label style="display:block;margin-bottom:15px;color:#ccc;">Número de WhatsApp</label>
+        <input id="cfgWhatsapp" placeholder="529983852946" value="529983852946">
+        <label style="display:block;margin-bottom:15px;color:#ccc;">Contraseña Admin</label>
+        <input id="cfgPassword" placeholder="medio123" type="password">
+        <button onclick="guardarConfig()">Guardar</button>
+      </section>
+    </div>
+  </main>
+  <script src="js/admin-v3.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script>
+    // NAV
+    function showSection(name){
+      document.querySelectorAll(".dashboard-section").forEach(s=>s.style.display="none");
+      document.getElementById("sec-"+name).style.display="";
+      document.querySelectorAll("aside li[data-section]").forEach(li=>{
+        li.classList.toggle("active",li.dataset.section===name);
+      });
+    }
+
+    // STATS
+    function updateStats(){
+      const prods=JSON.parse(localStorage.getItem("productos"))||[];
+      const promos=JSON.parse(localStorage.getItem("promociones"))||[];
+      document.getElementById("statProductos").textContent=prods.length;
+      document.getElementById("statPromos").textContent=promos.length;
+    }
+
+    // CONFIG
+    function guardarConfig(){
+      localStorage.setItem("cfgWhatsapp",document.getElementById("cfgWhatsapp").value);
+      localStorage.setItem("cfgPassword",document.getElementById("cfgPassword").value);
+      alert("Guardado");
+    }
+
+    updateStats();
+  </script>
+  <style>
+    aside li.active{background:var(--primary);color:#111;font-weight:700;}
+    aside li i{margin-right:10px;width:18px;text-align:center;}
+    aside li{display:flex;align-items:center;}
+  </style>
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Medio Urbano</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none;">
+    <div class="loading-spinner"></div>
+    <p>Cargando datos...</p>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="login-page" id="loginPage">
+    <div class="login-box">
+      <img src="img/logo-marca.png" alt="Medio Urbano" class="login-logo">
+      <h1 class="login-title">PANEL DE ADMIN</h1>
+      <div class="login-form">
+        <input type="password" id="loginPassword" placeholder="Password" class="login-input">
+        <button class="login-btn" onclick="login()">Entrar</button>
+        <p class="login-error" id="loginError">Password incorrecto</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PANEL -->
+  <div class="admin-page" id="adminPage" style="display:none;">
+
+    <!-- HEADER -->
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <img src="img/logo-marca.png" alt="Medio Urbano" class="admin-logo">
+        <h1 class="admin-title">ADMIN</h1>
+        <span class="conn-ok" id="connectionStatus">● Conectado</span>
+      </div>
+      <div class="admin-header-right">
+        <a href="index.html" class="admin-btn-view" target="_blank">Ver Sitio</a>
+        <button class="admin-btn-logout" onclick="logout()">Cerrar Sesion</button>
+      </div>
+    </header>
+
+    <!-- TABS -->
+    <nav class="admin-tabs">
+      <button class="admin-tab active" data-tab="cocina" onclick="switchTab('cocina', this)">Menu Cocina</button>
+      <button class="admin-tab" data-tab="salad" onclick="switchTab('salad', this)">Menu Salad</button>
+      <button class="admin-tab" data-tab="burgers" onclick="switchTab('burgers', this)">Menu Burgers</button>
+      <button class="admin-tab" data-tab="pasta" onclick="switchTab('pasta', this)">Menu Pasta</button>
+      <button class="admin-tab" data-tab="horarios" onclick="switchTab('horarios', this)">Horarios</button>
+      <button class="admin-tab" data-tab="backup" onclick="switchTab('backup', this)">Backup</button>
+    </nav>
+
+    <!-- CONTENIDO -->
+    <main class="admin-content">
+
+      <!-- TAB: MENU COCINA -->
+      <div class="admin-tab-content active" id="tabCocina">
+        <div class="admin-section-header">
+          <h2>Menu Cocina</h2>
+          <div class="admin-header-actions">
+            <input type="text" placeholder="Buscar..." class="admin-input admin-search-input" oninput="searchCocina(this.value)">
+            <button class="admin-btn-add" onclick="addItem('cocina')">+ Agregar Plato</button>
+          </div>
+        </div>
+        <div class="admin-list" id="listCocina"></div>
+      </div>
+
+      <!-- TAB: MENU SALAD -->
+      <div class="admin-tab-content" id="tabSalad">
+        <div class="admin-section-header">
+          <h2>Menu Salad</h2>
+          <div class="admin-header-actions">
+            <input type="text" placeholder="Buscar..." class="admin-input admin-search-input" oninput="searchSalad(this.value)">
+            <button class="admin-btn-add" onclick="addItem('salad')">+ Agregar Producto</button>
+          </div>
+        </div>
+        <div class="admin-list" id="listSalad"></div>
+      </div>
+
+      <!-- TAB: MENU BURGERS -->
+      <div class="admin-tab-content" id="tabBurgers">
+        <div class="admin-section-header">
+          <h2>Menu Burgers</h2>
+          <div class="admin-header-actions">
+            <input type="text" placeholder="Buscar..." class="admin-input admin-search-input" oninput="searchBurgers(this.value)">
+            <button class="admin-btn-add" onclick="addItem('burgers')">+ Agregar Producto</button>
+          </div>
+        </div>
+        <div class="admin-categorias" id="burgersCategorias"></div>
+        <div class="admin-list" id="listBurgers"></div>
+      </div>
+
+      <!-- TAB: MENU PASTA -->
+      <div class="admin-tab-content" id="tabPasta">
+        <div class="admin-section-header">
+          <h2>Menu Pasta</h2>
+          <div class="admin-header-actions">
+            <input type="text" placeholder="Buscar..." class="admin-input admin-search-input" oninput="searchPasta(this.value)">
+            <button class="admin-btn-add" onclick="addItem('pasta')">+ Agregar Producto</button>
+          </div>
+        </div>
+        <div class="admin-list" id="listPasta"></div>
+      </div>
+
+      <!-- TAB: HORARIOS -->
+      <div class="admin-tab-content" id="tabHorarios">
+        <div class="admin-section-header">
+          <h2>Horarios de Atencion</h2>
+        </div>
+
+        <div class="admin-horario-card">
+          <h3>🍳 Medio Urbano Cocina</h3>
+          <div class="admin-dias-row">
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaLun" value="1"> Lun</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaMar" value="2"> Mar</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaMie" value="3"> Mie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaJue" value="4"> Jue</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaVie" value="5"> Vie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaSab" value="6"> Sab</label>
+            <label class="admin-dia-check"><input type="checkbox" id="cocinaDom" value="0"> Dom</label>
+          </div>
+          <div class="admin-horario-times">
+            <div class="admin-time-group">
+              <label>Apertura:</label>
+              <input type="time" id="cocinaApertura" class="admin-input-time">
+              <span class="admin-time-label" id="cocinaAperturaLabel"></span>
+            </div>
+            <div class="admin-time-group">
+              <label>Cierre:</label>
+              <input type="time" id="cocinaCierre" class="admin-input-time">
+              <span class="admin-time-label" id="cocinaCierreLabel"></span>
+            </div>
+          </div>
+          <button class="admin-btn-save" onclick="saveHorarios('cocina')">Guardar Horarios Cocina</button>
+        </div>
+
+        <div class="admin-horario-card">
+          <h3>🥗 Medio Urbano Salad</h3>
+          <div class="admin-dias-row">
+            <label class="admin-dia-check"><input type="checkbox" id="saladLun" value="1"> Lun</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladMar" value="2"> Mar</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladMie" value="3"> Mie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladJue" value="4"> Jue</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladVie" value="5"> Vie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladSab" value="6"> Sab</label>
+            <label class="admin-dia-check"><input type="checkbox" id="saladDom" value="0"> Dom</label>
+          </div>
+          <div class="admin-horario-times">
+            <div class="admin-time-group">
+              <label>Apertura:</label>
+              <input type="time" id="saladApertura" class="admin-input-time">
+              <span class="admin-time-label" id="saladAperturaLabel"></span>
+            </div>
+            <div class="admin-time-group">
+              <label>Cierre:</label>
+              <input type="time" id="saladCierre" class="admin-input-time">
+              <span class="admin-time-label" id="saladCierreLabel"></span>
+            </div>
+          </div>
+          <button class="admin-btn-save" onclick="saveHorarios('salad')">Guardar Horarios Salad</button>
+        </div>
+
+        <div class="admin-horario-card">
+          <h3>🍔 Medio Urbano Burgers</h3>
+          <div class="admin-dias-row">
+            <label class="admin-dia-check"><input type="checkbox" id="burgersLun" value="1"> Lun</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersMar" value="2"> Mar</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersMie" value="3"> Mie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersJue" value="4"> Jue</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersVie" value="5"> Vie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersSab" value="6"> Sab</label>
+            <label class="admin-dia-check"><input type="checkbox" id="burgersDom" value="0"> Dom</label>
+          </div>
+          <div class="admin-horario-times">
+            <div class="admin-time-group">
+              <label>Apertura:</label>
+              <input type="time" id="burgersApertura" class="admin-input-time">
+              <span class="admin-time-label" id="burgersAperturaLabel"></span>
+            </div>
+            <div class="admin-time-group">
+              <label>Cierre:</label>
+              <input type="time" id="burgersCierre" class="admin-input-time">
+              <span class="admin-time-label" id="burgersCierreLabel"></span>
+            </div>
+          </div>
+          <button class="admin-btn-save" onclick="saveHorarios('burgers')">Guardar Horarios Burgers</button>
+        </div>
+
+        <div class="admin-horario-card">
+          <h3>🍝 Medio Urbano Pasta</h3>
+          <div class="admin-dias-row">
+            <label class="admin-dia-check"><input type="checkbox" id="pastaLun" value="1"> Lun</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaMar" value="2"> Mar</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaMie" value="3"> Mie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaJue" value="4"> Jue</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaVie" value="5"> Vie</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaSab" value="6"> Sab</label>
+            <label class="admin-dia-check"><input type="checkbox" id="pastaDom" value="0"> Dom</label>
+          </div>
+          <div class="admin-horario-times">
+            <div class="admin-time-group">
+              <label>Apertura:</label>
+              <input type="time" id="pastaApertura" class="admin-input-time">
+              <span class="admin-time-label" id="pastaAperturaLabel"></span>
+            </div>
+            <div class="admin-time-group">
+              <label>Cierre:</label>
+              <input type="time" id="pastaCierre" class="admin-input-time">
+              <span class="admin-time-label" id="pastaCierreLabel"></span>
+            </div>
+          </div>
+          <button class="admin-btn-save" onclick="saveHorarios('pasta')">Guardar Horarios Pasta</button>
+        </div>
+      </div>
+
+      <!-- TAB: BACKUP -->
+      <div class="admin-tab-content" id="tabBackup">
+        <div class="admin-section-header">
+          <h2>Backup y Restaurar</h2>
+        </div>
+
+        <div class="admin-backup-card">
+          <h3>Exportar Datos</h3>
+          <p>Descarga todos los menus, horarios y configuracion en un archivo JSON.</p>
+          <button class="admin-btn-export" onclick="exportData()">Descargar Backup</button>
+        </div>
+
+        <div class="admin-backup-card">
+          <h3>Importar Datos</h3>
+          <p>Restaura los datos desde un archivo JSON previamente exportado.</p>
+          <input type="file" id="importFile" accept=".json" onchange="importData(event)">
+          <label for="importFile" class="admin-btn-import">Seleccionar Archivo</label>
+        </div>
+
+        <div class="admin-backup-card admin-danger">
+          <h3>Resetear Todo</h3>
+          <p>Borra todos los datos de Firestore y restaura los valores predeterminados.</p>
+          <button class="admin-btn-danger" onclick="resetAll()">Resetear Datos</button>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL EDITAR ITEM -->
+  <div class="admin-modal-overlay" id="modalEditItem">
+    <div class="admin-modal">
+      <div class="admin-modal-header">
+        <h3 id="modalEditTitle">Editar</h3>
+        <button class="admin-modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <input type="hidden" id="editItemId">
+        <input type="hidden" id="editItemSource">
+
+        <div class="admin-form-group">
+          <label>Nombre</label>
+          <input type="text" id="editItemNombre" class="admin-input">
+        </div>
+
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label>Precio ($)</label>
+            <input type="number" id="editItemPrecio" class="admin-input-small" min="0">
+          </div>
+          <div class="admin-form-group">
+            <label>Emoji</label>
+            <input type="text" id="editItemEmoji" class="admin-input-small" maxlength="4">
+          </div>
+        </div>
+
+        <div class="admin-form-group">
+          <label>Descripcion</label>
+          <textarea id="editItemDesc" class="admin-input" rows="2"></textarea>
+        </div>
+
+        <div class="admin-form-row">
+          <div class="admin-form-group">
+            <label>Categoria</label>
+            <select id="editItemCategoria" class="admin-input-small">
+              <option value="Platos">Platos</option>
+              <option value="Ensaladas">Ensaladas</option>
+              <option value="Bebidas">Bebidas</option>
+              <option value="Hamburguesas">Hamburguesas</option>
+              <option value="Hot Dogs">Hot Dogs</option>
+              <option value="Papas">Papas</option>
+              <option value="Pastas">Pastas</option>
+              <option value="Complementos">Complementos</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>Disponible</label>
+            <label class="admin-toggle">
+              <input type="checkbox" id="editItemDisponible" checked>
+              <span class="admin-toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="admin-btn-cancel" onclick="closeModal()">Cancelar</button>
+        <button class="admin-btn-save-modal" onclick="saveItem()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL CONFIRMAR -->
+  <div class="admin-modal-overlay" id="modalConfirm">
+    <div class="admin-modal admin-modal-small">
+      <div class="admin-modal-header">
+        <h3>Confirmar</h3>
+        <button class="admin-modal-close" onclick="closeConfirm()">&times;</button>
+      </div>
+      <div class="admin-modal-body">
+        <p id="confirmMessage">Estas seguro?</p>
+      </div>
+      <div class="admin-modal-footer">
+        <button class="admin-btn-cancel" onclick="closeConfirm()">Cancelar</button>
+        <button class="admin-btn-danger" id="confirmBtn">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="admin-toast" id="adminToast"></div>
+
+  <!-- SCRIPTS -->
+  <script src="js/firebase-config.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/menu-cocina.js"></script>
+  <script src="js/menu-salad.js"></script>
+  <script src="js/menu-burgers.js"></script>
+  <script src="js/menu-pasta.js"></script>
+  <script src="js/admin.js"></script>
+
+</body>
+</html>

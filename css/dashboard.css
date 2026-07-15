@@ -1,0 +1,69 @@
+/*====================================================
+dashboard.css - MEDIO URBANO V3
+====================================================*/
+
+.dashboard{padding:40px;display:grid;gap:30px;}
+
+/* CARDS */
+.dashboard-cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:25px;
+}
+.card{
+  background:#151515;padding:30px;border-radius:20px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:.35s;border:1px solid rgba(255,255,255,.05);
+}
+.card:hover{transform:translateY(-8px);box-shadow:0 20px 40px rgba(0,0,0,.35);}
+.card i{font-size:55px;color:var(--primary);}
+.card h2{font-size:38px;margin-bottom:10px;}
+.card span{color:#bcbcbc;font-size:15px;}
+
+/* GRID */
+.dashboard-grid{
+  display:grid;grid-template-columns:2fr 1fr;
+  gap:30px;margin-top:30px;
+}
+
+/* PEDIDOS */
+.orders{background:#141414;border-radius:20px;padding:30px;}
+.orders h2{margin-bottom:25px;color:var(--primary);}
+.order{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:20px;border-bottom:1px solid rgba(255,255,255,.05);transition:.3s;
+}
+.order:hover{background:#1d1d1d;}
+.order strong{font-size:18px;}
+.order small{color:#999;}
+.status{padding:8px 18px;border-radius:50px;font-size:13px;font-weight:700;}
+.pending{background:#ff9800;color:white;}
+.completed{background:#35c759;color:white;}
+.cancelled{background:#ff3b30;color:white;}
+
+/* ACTIVIDAD */
+.activity{background:#141414;padding:30px;border-radius:20px;}
+.activity h2{margin-bottom:25px;color:var(--primary);}
+.activity ul{display:flex;flex-direction:column;gap:18px;}
+.activity li{
+  display:flex;gap:15px;align-items:flex-start;
+  padding-bottom:18px;border-bottom:1px solid rgba(255,255,255,.05);
+}
+.activity i{color:var(--primary);margin-top:3px;}
+
+/* GRAFICAS */
+.chart{
+  margin-top:35px;height:350px;background:#181818;border-radius:20px;
+  display:flex;align-items:center;justify-content:center;
+  color:#666;font-size:20px;border:2px dashed rgba(255,255,255,.08);
+}
+
+/* RESPONSIVE */
+@media(max-width:992px){.dashboard-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){
+  .dashboard{padding:20px;}
+  .dashboard-cards{grid-template-columns:1fr;}
+  .card{padding:25px;}
+  .card h2{font-size:30px;}
+  .chart{height:250px;}
+}

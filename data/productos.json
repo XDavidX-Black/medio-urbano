@@ -1,0 +1,9 @@
+[
+  {"id":1,"categoria":"cocina","nombre":"Menú del Día","descripcion":"Platillo preparado diariamente.","precio":0,"imagen":"img/cocina/menu-dia.webp","disponible":true},
+  {"id":2,"categoria":"cocina","nombre":"Pollo Asado","descripcion":"Con arroz y verduras.","precio":0,"imagen":"img/cocina/pollo-asado.webp","disponible":true},
+  {"id":3,"categoria":"cocina","nombre":"Milanesa de Pollo","descripcion":"Acompañada de puré.","precio":0,"imagen":"img/cocina/milanesa.webp","disponible":true},
+  {"id":101,"categoria":"salad","nombre":"Salad Clásica","descripcion":"Base + proteína + toppings.","precio":0,"imagen":"img/salad/clasica.webp","disponible":true},
+  {"id":102,"categoria":"salad","nombre":"Salad Premium","descripcion":"Ingredientes frescos del día.","precio":0,"imagen":"img/salad/premium.webp","disponible":true},
+  {"id":201,"categoria":"burgers","nombre":"Hamburguesas","descripcion":"Próximamente.","precio":0,"imagen":"img/burgers/proximamente.webp","disponible":false},
+  {"id":301,"categoria":"pasta","nombre":"Pastas","descripcion":"Próximamente.","precio":0,"imagen":"img/pasta/proximamente.webp","disponible":false}
+]

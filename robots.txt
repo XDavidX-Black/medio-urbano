@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin-v3.html
+Disallow: /panel-v3.html
+Disallow: /js/admin-v3.js
+Disallow: /js/firebase.js
+
+Sitemap: https://mediourbano.com/sitemap.xml

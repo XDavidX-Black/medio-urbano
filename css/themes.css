@@ -1,0 +1,93 @@
+/*=========================================
+TEMA DEFAULT
+=========================================*/
+body.theme-default{
+  --primary:#FFD028;
+  --secondary:#49C26B;
+  --accent:#D62828;
+}
+
+/*=========================================
+COCINA
+=========================================*/
+body.theme-cocina{
+  --primary:#5B8C2A;
+  --secondary:#7DAE39;
+  --accent:#91D447;
+}
+body.theme-cocina .hero{
+  background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.90)),url("../img/themes/cocina.webp");
+  background-size:cover;background-position:center;
+}
+body.theme-cocina .btn-primary,
+body.theme-cocina .btn-brand{background:var(--primary);color:white;}
+body.theme-cocina .section-title span{color:var(--primary);}
+body.theme-cocina .brand:hover{box-shadow:0 0 35px rgba(91,140,42,.35);}
+
+/*=========================================
+SALAD
+=========================================*/
+body.theme-salad{
+  --primary:#31C46D;
+  --secondary:#00A651;
+  --accent:#B8FFCE;
+}
+body.theme-salad .hero{
+  background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.90)),url("../img/themes/salad.webp");
+  background-size:cover;background-position:center;
+}
+body.theme-salad .btn-primary,
+body.theme-salad .btn-brand{background:var(--primary);color:white;}
+body.theme-salad .section-title span{color:var(--primary);}
+body.theme-salad .brand:hover{box-shadow:0 0 35px rgba(49,196,109,.35);}
+
+/*=========================================
+BURGERS
+=========================================*/
+body.theme-burgers{
+  --primary:#FFD028;
+  --secondary:#FF9800;
+  --accent:#FFE082;
+}
+body.theme-burgers .hero{
+  background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.90)),url("../img/themes/burgers.webp");
+  background-size:cover;background-position:center;
+}
+body.theme-burgers .btn-primary,
+body.theme-burgers .btn-brand{background:var(--primary);color:#111;}
+body.theme-burgers .section-title span{color:var(--primary);}
+body.theme-burgers .brand:hover{box-shadow:0 0 35px rgba(255,208,40,.40);}
+
+/*=========================================
+PASTA
+=========================================*/
+body.theme-pasta{
+  --primary:#D62828;
+  --secondary:#AA1111;
+  --accent:#FF8A80;
+}
+body.theme-pasta .hero{
+  background:linear-gradient(rgba(0,0,0,.82),rgba(0,0,0,.90)),url("../img/themes/pasta.webp");
+  background-size:cover;background-position:center;
+}
+body.theme-pasta .btn-primary,
+body.theme-pasta .btn-brand{background:var(--primary);color:white;}
+body.theme-pasta .section-title span{color:var(--primary);}
+body.theme-pasta .brand:hover{box-shadow:0 0 35px rgba(214,40,40,.35);}
+
+/*=========================================
+TRANSICIONES
+=========================================*/
+body,header,.hero,.brand,.producto,.btn-primary,.btn-brand,.section-title span{
+  transition:background .45s,color .45s,border-color .45s,box-shadow .45s;
+}
+
+/*=========================================
+SCROLLBAR DINAMICO
+=========================================*/
+::-webkit-scrollbar-thumb{background:var(--primary);}
+
+/*=========================================
+SELECCION
+=========================================*/
+::selection{background:var(--primary);color:#111;}
