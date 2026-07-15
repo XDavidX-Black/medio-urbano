@@ -1,8 +1,7 @@
 /*====================================================
 admin-promos.js - MEDIO URBANO V3
-CRUD Promociones con Firebase Firestore + Storage
-Incluye: compresión de imagen, barra de progreso,
-preview, notificaciones
+CRUD Promociones con Firestore (sin Storage)
+Imágenes comprimidas guardadas como base64 en Firestore
 =====================================================*/
 
 let promosAdmin=[];
@@ -10,7 +9,7 @@ let promoEditId=null;
 
 function initAdminPromos(){
   if(typeof firebase==="undefined"||!firebase.firestore){
-    console.warn("Firebase no disponible para promos admin");
+    console.warn("Firebase no disponible para promos");
     return;
   }
   setupPromoUpload();
@@ -22,36 +21,24 @@ function setupPromoUpload(){
   const area=document.getElementById("promoUploadArea");
   const fileInput=document.getElementById("promoAdminFile");
   if(!area||!fileInput) return;
-
   area.addEventListener("click",()=>fileInput.click());
   area.addEventListener("dragover",e=>{e.preventDefault();area.classList.add("dragover");});
   area.addEventListener("dragleave",()=>area.classList.remove("dragover"));
-  area.addEventListener("drop",e=>{
-    e.preventDefault();area.classList.remove("dragover");
-    if(e.dataTransfer.files.length) handlePromoFile(e.dataTransfer.files[0]);
-  });
-  fileInput.addEventListener("change",e=>{
-    if(e.target.files.length) handlePromoFile(e.target.files[0]);
-  });
+  area.addEventListener("drop",e=>{e.preventDefault();area.classList.remove("dragover");if(e.dataTransfer.files.length)handlePromoFile(e.dataTransfer.files[0]);});
+  fileInput.addEventListener("change",e=>{if(e.target.files.length)handlePromoFile(e.target.files[0]);});
 }
 
 function handlePromoFile(file){
-  if(!file.type.startsWith("image/")){showPromoNotif("error","Solo se permiten imágenes");return;}
-  if(file.size>8000000){showPromoNotif("error","Imagen muy grande. Máximo 8MB");return;}
-
+  if(!file.type.startsWith("image/")){showPromoNotif("error","Solo imágenes");return;}
   const sizeEl=document.getElementById("promoImgSize");
   if(sizeEl) sizeEl.textContent="Original: "+(file.size/1024).toFixed(0)+"KB";
-
   const reader=new FileReader();
   reader.onload=e=>{
-    compressImage(e.target.result,1920,900,0.82).then(result=>{
-      const preview=document.getElementById("promoPreviewImg");
-      const wrap=document.getElementById("promoImgPreview");
-      preview.src=result.dataUrl;
-      wrap.style.display="block";
+    compressImage(e.target.result,1200,600,0.6).then(result=>{
+      document.getElementById("promoPreviewImg").src=result.dataUrl;
+      document.getElementById("promoImgPreview").style.display="block";
       document.getElementById("promoUploadArea").style.display="none";
-
-      if(sizeEl) sizeEl.textContent+=" → Comprimido: "+(result.dataUrl.length*0.75/1024).toFixed(0)+"KB";
+      if(sizeEl) sizeEl.textContent+=" → "+(result.dataUrl.length*0.75/1024).toFixed(0)+"KB (listo para Firestore)";
     });
   };
   reader.readAsDataURL(file);
@@ -67,8 +54,7 @@ function compressImage(dataUrl,maxW,maxH,quality){
       if(h>maxH){w=w*maxH/h;h=maxH;}
       canvas.width=w;canvas.height=h;
       canvas.getContext("2d").drawImage(img,0,0,w,h);
-      const compressed=canvas.toDataURL("image/jpeg",quality);
-      resolve({dataUrl:compressed,width:w,height:h});
+      resolve({dataUrl:canvas.toDataURL("image/jpeg",quality),width:w,height:h});
     };
     img.src=dataUrl;
   });
@@ -82,97 +68,32 @@ function limpiarPromoImagen(){
   document.getElementById("promoImgSize").textContent="";
 }
 
-/* ========== UPLOAD TO FIRESTORAGE ========== */
-function uploadPromoImageToStorage(dataUrl){
-  return new Promise((resolve,reject)=>{
-    const progress=document.getElementById("promoProgress");
-    const bar=document.getElementById("promoProgressBar");
-    if(progress) progress.style.display="block";
-    if(bar) bar.style.width="0%";
-
-    const byteString=atob(dataUrl.split(",")[1]);
-    const mime=dataUrl.split(",")[0].split(":")[1].split(";")[0];
-    const ab=new ArrayBuffer(byteString.length);
-    const ia=new Uint8Array(ab);
-    for(let i=0;i<byteString.length;i++) ia[i]=byteString.charCodeAt(i);
-    const blob=new Blob([ab],{type:mime});
-    const file=new File([blob],"promo_"+Date.now()+".jpg",{type:mime});
-
-    const ref=firebase.storage().ref().child("promos/"+file.name);
-    const task=ref.put(file);
-
-    task.on("state_changed",
-      snap=>{
-        const pct=(snap.bytesTransferred/snap.totalBytes)*100;
-        if(bar) bar.style.width=pct+"%";
-      },
-      err=>{if(progress) progress.style.display="none";reject(err);},
-      ()=>{if(progress) progress.style.display="none";task.snapshot.ref.getDownloadURL().then(resolve);}
-    );
-  });
-}
-
-/* ========== NOTIFICATIONS ========== */
+/* ========== NOTIFICATION ========== */
 function showPromoNotif(type,msg){
-  const existing=document.querySelector(".promo-notif");
-  if(existing) existing.remove();
-
+  const old=document.querySelector(".promo-notif");
+  if(old) old.remove();
   const div=document.createElement("div");
   div.className="promo-notif";
-  div.style.cssText="position:fixed;top:20px;right:20px;z-index:9999;padding:16px 24px;border-radius:14px;font-size:14px;font-weight:600;color:white;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .3s,opacity .3s;";
+  div.style.cssText="position:fixed;top:20px;right:20px;z-index:9999;padding:16px 24px;border-radius:14px;font-size:14px;font-weight:600;color:white;box-shadow:0 10px 30px rgba(0,0,0,.3);transition:transform .4s,opacity .4s;";
   div.style.background=type==="success"?"#35c759":type==="error"?"#ff3b30":"#ff9500";
-  div.innerHTML='<i class="fas fa-'+(type==="success"?"check-circle":type==="error"?"times-circle":"exclamation-circle")+'" style="margin-right:10px;"></i>'+msg;
+  div.innerHTML='<i class="fas fa-'+(type==="success"?"check-circle":"times-circle")+'" style="margin-right:10px;"></i>'+msg;
   document.body.appendChild(div);
-
-  setTimeout(()=>{div.style.transform="translateX(120%)";div.style.opacity="0";setTimeout(()=>div.remove(),400);},3500);
+  setTimeout(()=>{div.style.transform="translateX(120%)";div.style.opacity="0";setTimeout(()=>div.remove(),400);},3000);
 }
 
 /* ========== LOAD ========== */
 function loadAdminPromos(){
-  firebase.firestore().collection("promociones")
-    .orderBy("orden","asc")
-    .get()
+  firebase.firestore().collection("promociones").orderBy("orden","asc").get()
     .then(snap=>{
       promosAdmin=[];
       snap.forEach(doc=>promosAdmin.push({id:doc.id,...doc.data()}));
       renderAdminPromosTable();
       updatePromoStats();
     })
-    .catch(err=>console.error("Error loading promos:",err));
-}
-
-/* ========== TABLE ========== */
-function renderAdminPromosTable(){
-  const tbody=document.getElementById("tablaAdminPromos");
-  if(!tbody) return;
-  tbody.innerHTML="";
-  promosAdmin.forEach((p,i)=>{
-    tbody.innerHTML+=`
-      <tr>
-        <td>${p.imagen?`<img src="${p.imagen}" style="width:70px;height:50px;object-fit:cover;border-radius:8px;">`:'<span style="color:#666;">Sin imagen</span>'}</td>
-        <td>${p.titulo}</td>
-        <td>${p.marca||"-"}</td>
-        <td>${p.precio||"-"}</td>
-        <td><span style="color:${p.activo!==false?'var(--success)':'var(--danger)'};font-weight:700;">${p.activo!==false?'Activo':'Inactivo'}</span></td>
-        <td style="white-space:nowrap;">
-          <button onclick="moverPromo('${p.id}',-1)" style="padding:6px 10px;font-size:12px;" title="Subir">&#9650;</button>
-          <button onclick="moverPromo('${p.id}',1)" style="padding:6px 10px;font-size:12px;" title="Bajar">&#9660;</button>
-          <button onclick="togglePromoActivo('${p.id}')" style="padding:6px 12px;font-size:12px;background:${p.activo!==false?'#ff9500':'var(--success)'};color:white;border:none;border-radius:8px;cursor:pointer;">${p.activo!==false?'Off':'On'}</button>
-          <button onclick="editarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--success);color:white;border:none;border-radius:8px;cursor:pointer;">Editar</button>
-          <button onclick="eliminarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;">Eliminar</button>
-        </td>
-      </tr>`;
-  });
-}
-
-/* ========== STATS ========== */
-function updatePromoStats(){
-  const statsEl=document.getElementById("promoStatsList");
-  const statDash=document.getElementById("statPromos");
-  const activas=promosAdmin.filter(p=>p.activo!==false).length;
-  const inactivas=promosAdmin.filter(p=>p.activo===false).length;
-  if(statsEl) statsEl.innerHTML=`<span style="color:var(--success);">Activas: ${activas}</span> &nbsp;|&nbsp; <span style="color:var(--danger);">Inactivas: ${inactivas}</span> &nbsp;|&nbsp; Total: ${promosAdmin.length}`;
-  if(statDash) statDash.textContent=promosAdmin.length;
+    .catch(err=>{
+      console.error("Error:",err);
+      showPromoNotif("error","Error al cargar: "+err.message);
+    });
 }
 
 /* ========== SAVE / UPDATE ========== */
@@ -195,32 +116,27 @@ function guardarPromoAdmin(){
     titulo,descripcion,precio,marca,
     boton:boton||"Ver Menú",
     url:url||"#",
-    activo:promoEditId?(promosAdmin.find(p=>p.id===promoEditId)?.activo!==false?true:false):true,
+    activo:promoEditId?(promosAdmin.find(p=>p.id===promoEditId)?.activo!==false):true,
     orden:promoEditId?(promosAdmin.find(p=>p.id===promoEditId)?.orden||0):promosAdmin.length,
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    updatedAt:new Date().toISOString()
   };
 
-  const imagePromise=hasNewImage?uploadPromoImageToStorage(previewImg.src):Promise.resolve(null);
+  if(hasNewImage) data.imagen=previewImg.src;
+  else if(!promoEditId) data.imagen="";
 
-  imagePromise.then(imgUrl=>{
-    if(imgUrl) data.imagen=imgUrl;
-    else if(!promoEditId) data.imagen="";
+  const promise=promoEditId
+    ?firebase.firestore().collection("promociones").doc(promoEditId).update(data)
+    :firebase.firestore().collection("promociones").add({...data,createdAt:new Date().toISOString()});
 
-    if(promoEditId){
-      return firebase.firestore().collection("promociones").doc(promoEditId).update(data);
-    }else{
-      data.createdAt=firebase.firestore.FieldValue.serverTimestamp();
-      return firebase.firestore().collection("promociones").add(data);
-    }
-  }).then(()=>{
-    showPromoNotif("success",promoEditId?"Promoción actualizada correctamente":"Promoción creada correctamente");
+  promise.then(()=>{
+    showPromoNotif("success",promoEditId?"Promoción actualizada":"Promoción creada");
     limpiarPromoForm();
     loadAdminPromos();
   }).catch(err=>{
-    console.error("Error guardando promo:",err);
+    console.error("Error:",err);
     showPromoNotif("error","Error: "+err.message);
   }).finally(()=>{
-    saveBtn.textContent=promoEditId?"Actualizar Promoción":"Guardar Promoción";
+    saveBtn.textContent=promoEditId?"Actualizar":"Guardar Promoción";
     saveBtn.disabled=false;
   });
 }
@@ -236,59 +152,79 @@ function editarPromoAdmin(id){
   document.getElementById("promoAdminMarca").value=p.marca||"MEDIO URBANO";
   document.getElementById("promoAdminBtn").value=p.boton||"Ver Menú";
   document.getElementById("promoAdminUrl").value=p.url||"";
-
-  const preview=document.getElementById("promoPreviewImg");
-  const wrap=document.getElementById("promoImgPreview");
-  if(preview&&p.imagen){
-    preview.src=p.imagen;wrap.style.display="block";
+  if(p.imagen){
+    document.getElementById("promoPreviewImg").src=p.imagen;
+    document.getElementById("promoImgPreview").style.display="block";
     document.getElementById("promoUploadArea").style.display="none";
   }
-
   document.getElementById("promoFormTitle").textContent="Editar Promoción";
-  document.getElementById("promoAdminSaveBtn").textContent="Actualizar Promoción";
+  document.getElementById("promoAdminSaveBtn").textContent="Actualizar";
   document.getElementById("promoAdminCancelBtn").style.display="inline-block";
 }
 
 /* ========== DELETE ========== */
 function eliminarPromoAdmin(id){
-  if(!confirm("¿Eliminar esta promoción permanentemente?")) return;
+  if(!confirm("¿Eliminar?")) return;
   firebase.firestore().collection("promociones").doc(id).delete()
-    .then(()=>{showPromoNotif("success","Promoción eliminada");loadAdminPromos();})
-    .catch(err=>showPromoNotif("error","Error: "+err.message));
+    .then(()=>{showPromoNotif("success","Eliminada");loadAdminPromos();})
+    .catch(err=>showPromoNotif("error",err.message));
 }
 
-/* ========== TOGGLE ACTIVE ========== */
+/* ========== TOGGLE ========== */
 function togglePromoActivo(id){
   const p=promosAdmin.find(item=>item.id===id);
   if(!p) return;
-  const nuevoEstado=p.activo===false?true:false;
-  firebase.firestore().collection("promociones").doc(id).update({
-    activo:nuevoEstado,
-    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
-  }).then(()=>{
-    showPromoNotif("success",nuevoEstado?"Promoción activada":"Promoción desactivada");
-    loadAdminPromos();
-  });
+  firebase.firestore().collection("promociones").doc(id).update({activo:p.activo===false?true:false})
+    .then(()=>{showPromoNotif("success","Actualizado");loadAdminPromos();});
 }
 
 /* ========== MOVE ORDER ========== */
-function moverPromo(id,direction){
+function moverPromo(id,dir){
   const idx=promosAdmin.findIndex(p=>p.id===id);
-  if(idx<0) return;
-  const swapIdx=idx+direction;
-  if(swapIdx<0||swapIdx>=promosAdmin.length) return;
-
-  const a=promosAdmin[idx];
-  const b=promosAdmin[swapIdx];
+  const swap=idx+dir;
+  if(swap<0||swap>=promosAdmin.length) return;
+  const a=promosAdmin[idx],b=promosAdmin[swap];
   const batch=firebase.firestore().batch();
-
-  batch.update(firebase.firestore().collection("promociones").doc(a.id),{orden:b.orden||swapIdx});
+  batch.update(firebase.firestore().collection("promociones").doc(a.id),{orden:b.orden||swap});
   batch.update(firebase.firestore().collection("promociones").doc(b.id),{orden:a.orden||idx});
-
   batch.commit().then(()=>loadAdminPromos());
 }
 
-/* ========== CLEAR FORM ========== */
+/* ========== TABLE ========== */
+function renderAdminPromosTable(){
+  const tbody=document.getElementById("tablaAdminPromos");
+  if(!tbody) return;
+  tbody.innerHTML="";
+  promosAdmin.forEach(p=>{
+    tbody.innerHTML+=`
+      <tr>
+        <td>${p.imagen?`<img src="${p.imagen}" style="width:70px;height:50px;object-fit:cover;border-radius:8px;">`:'<span style="color:#666;">Sin imagen</span>'}</td>
+        <td>${p.titulo}</td>
+        <td>${p.marca||"-"}</td>
+        <td>${p.precio||"-"}</td>
+        <td><span style="color:${p.activo!==false?'var(--success)':'var(--danger)'};font-weight:700;">${p.activo!==false?'Activo':'Inactivo'}</span></td>
+        <td style="white-space:nowrap;">
+          <button onclick="moverPromo('${p.id}',-1)" style="padding:6px 10px;font-size:12px;">&#9650;</button>
+          <button onclick="moverPromo('${p.id}',1)" style="padding:6px 10px;font-size:12px;">&#9660;</button>
+          <button onclick="togglePromoActivo('${p.id}')" style="padding:6px 12px;font-size:12px;background:${p.activo!==false?'#ff9500':'var(--success)'};color:white;border:none;border-radius:8px;cursor:pointer;">${p.activo!==false?'Off':'On'}</button>
+          <button onclick="editarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--success);color:white;border:none;border-radius:8px;cursor:pointer;">Editar</button>
+          <button onclick="eliminarPromoAdmin('${p.id}')" style="padding:6px 12px;font-size:12px;background:var(--danger);color:white;border:none;border-radius:8px;cursor:pointer;">Eliminar</button>
+        </td>
+      </tr>`;
+  });
+}
+
+/* ========== STATS ========== */
+function updatePromoStats(){
+  const activas=promosAdmin.filter(p=>p.activo!==false).length;
+  const inactivas=promosAdmin.filter(p=>p.activo===false).length;
+  const el=document.getElementById("promoStatsList");
+  if(el) el.innerHTML=`<span style="color:var(--success);">Activas: ${activas}</span> | <span style="color:var(--danger);">Inactivas: ${inactivas}</span> | Total: ${promosAdmin.length}`;
+  const dash=document.getElementById("statPromos");
+  if(dash) dash.textContent=promosAdmin.length;
+}
+
+/* ========== CLEAR ========== */
 function limpiarPromoForm(){
   document.getElementById("promoAdminTitulo").value="";
   document.getElementById("promoAdminDesc").value="";
