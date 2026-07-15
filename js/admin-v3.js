@@ -207,13 +207,14 @@ function mostrarProductos(){
   if(buscar) filtered=filtered.filter(p=>p.nombre.toLowerCase().includes(buscar));
   filtered.sort((a,b)=>(a.orden||0)-(b.orden||0));
   tabla.innerHTML="";
+  const catNames={cocina:"Cocina",salad:"Salad",burgers:"Burgers",pasta:"Pasta"};
   filtered.forEach(producto=>{
     const disponible=producto.estado!==0;
     tabla.innerHTML+=`
       <tr>
         <td><img src="${producto.imagen||''}" width="50" style="border-radius:8px;${producto.imagen?'':'display:none;'}"></td>
         <td>${producto.nombre}</td>
-        <td>${producto.categoria}</td>
+        <td>${catNames[producto.categoria]||producto.categoria}</td>
         <td>$${producto.precio}</td>
         <td><span style="color:${disponible?'var(--success)':'var(--danger)'};font-weight:700;">${disponible?'Activo':'Inactivo'}</span></td>
         <td>${producto.destacado?'<i class="fas fa-star" style="color:var(--primary);"></i>':'<span style="color:#444;">—</span>'}</td>

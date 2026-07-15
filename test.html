@@ -1429,17 +1429,17 @@
         nombre:"COCINA",
         color:"#5B8C2A",
         productos:[
-          {id:1,nombre:"Menú del Día",descripcion:"Platillo casero preparado diariamente.",precio:0,imagen:"img/cocina/menu-dia.webp"},
-          {id:2,nombre:"Pollo Asado",descripcion:"Acompañado de arroz y verduras.",precio:0,imagen:"img/cocina/pollo.webp"},
-          {id:3,nombre:"Milanesa de Pollo",descripcion:"Con puré y ensalada.",precio:0,imagen:"img/cocina/milanesa.webp"}
+          {id:1,nombre:"Menú del Día",descripcion:"Platillo casero preparado diariamente.",precio:0,imagen:"img/cocina/menu-dia.webp",categoria:"cocina",extras:[],estado:1,destacado:false},
+          {id:2,nombre:"Pollo Asado",descripcion:"Acompañado de arroz y verduras.",precio:0,imagen:"img/cocina/pollo.webp",categoria:"cocina",extras:[],estado:1,destacado:false},
+          {id:3,nombre:"Milanesa de Pollo",descripcion:"Con puré y ensalada.",precio:0,imagen:"img/cocina/milanesa.webp",categoria:"cocina",extras:[],estado:1,destacado:false}
         ]
       },
       salad:{
         nombre:"SALAD",
         color:"#3DBB68",
         productos:[
-          {id:101,nombre:"Salad Clásica",descripcion:"Base + proteína + toppings.",precio:0,imagen:"img/salad/clasica.webp"},
-          {id:102,nombre:"Salad Premium",descripcion:"Ingredientes frescos del día.",precio:0,imagen:"img/salad/premium.webp"}
+          {id:101,nombre:"Salad Clásica",descripcion:"Base + proteína + toppings.",precio:0,imagen:"img/salad/clasica.webp",categoria:"salad",extras:[],estado:1,destacado:false},
+          {id:102,nombre:"Salad Premium",descripcion:"Ingredientes frescos del día.",precio:0,imagen:"img/salad/premium.webp",categoria:"salad",extras:[],estado:1,destacado:false}
         ]
       },
       burgers:{nombre:"BURGERS",proximamente:true,productos:[]},
@@ -1447,6 +1447,27 @@
     };
 
     let categorias=JSON.parse(JSON.stringify(categoriasBase));
+
+    function seedBaseProducts(){
+      const existing=JSON.parse(localStorage.getItem("productos"))||[];
+      let changed=false;
+      Object.entries(categoriasBase).forEach(([cat,data])=>{
+        (data.productos||[]).forEach(bp=>{
+          const found=existing.find(p=>p.id===bp.id);
+          if(found){
+            if(!found.categoria){found.categoria=cat;changed=true;}
+            if(found.extras===undefined){found.extras=[];changed=true;}
+            if(found.estado===undefined){found.estado=1;changed=true;}
+            if(found.destacado===undefined){found.destacado=false;changed=true;}
+          }else{
+            existing.push({id:bp.id,nombre:bp.nombre,precio:bp.precio,descripcion:bp.descripcion||"",categoria:cat,imagen:bp.imagen||"",extras:[],estado:1,destacado:false,orden:0});
+            changed=true;
+          }
+        });
+      });
+      if(changed) localStorage.setItem("productos",JSON.stringify(existing));
+    }
+    seedBaseProducts();
 
     function cargarProductosAdmin(){
       const adminProd=JSON.parse(localStorage.getItem("productos"))||[];
@@ -1460,7 +1481,10 @@
             descripcion:p.descripcion,
             precio:Number(p.precio)||0,
             imagen:p.imagen,
-            categoria:p.categoria
+            categoria:p.categoria,
+            extras:p.extras||[],
+            estado:p.estado!==undefined?p.estado:1,
+            destacado:p.destacado||false
           });
         }
       });
@@ -1521,15 +1545,19 @@
             <p>Selecciona tus productos favoritos</p>
           </div>
           <div class="productos-grid">
-            ${productos.length?productos.map(p=>`
-              <div class="producto">
+            ${productos.length?productos.map(p=>{
+              const disabled=p.estado===0;
+              const extrasHtml=(p.extras&&p.extras.length)?`<div style="font-size:11px;color:#888;margin-top:4px;">Extras: ${p.extras.map(e=>e.nombre+' +$'+e.precio).join(', ')}</div>`:'';
+              return `
+              <div class="producto" ${disabled?'style="opacity:.5;pointer-events:none;"':''}>
                 <img src="${p.imagen}" alt="${p.nombre}">
-                <h3>${p.nombre}</h3>
+                <h3>${p.nombre}${p.destacado?' <i class="fas fa-star" style="color:#ff9500;font-size:14px;"></i>':''}</h3>
                 <p>${p.descripcion}</p>
+                ${extrasHtml}
                 <strong>$${p.precio}</strong>
-                <button onclick="agregarProducto(${p.id})">Agregar</button>
-              </div>
-            `).join(""):'<p style="color:var(--text-secondary);text-align:center;grid-column:1/-1;padding:40px;">No hay productos disponibles aún</p>'}
+                <button onclick="agregarProducto(${p.id})" ${disabled?'class="disabled"':''}>${disabled?'No disponible':'Agregar'}</button>
+              </div>`;
+            }).join(""):'<p style="color:var(--text-secondary);text-align:center;grid-column:1/-1;padding:40px;">No hay productos disponibles aún</p>'}
           </div>
         </div>
       `;
@@ -1543,7 +1571,10 @@
       Object.keys(categorias).forEach(c=>{
         if(categorias[c].productos){
           categorias[c].productos.forEach(p=>{
-            if(p.id===id) agregarCarrito(p);
+            if(p.id===id){
+              if(p.estado===0) return;
+              agregarCarrito(p);
+            }
           });
         }
       });
